@@ -16,11 +16,9 @@ locals {
 
 
 resource "azurerm_kubernetes_cluster" "cluster" {
-  location                  = var.location
-  resource_group_name       = var.resource_group_name
-  name                      = "${var.project_name}-${local.aks_abbrevation}-${local.aks_profile}-${var.environment}-${var.location}-${local.kubernetes_instance_count}"
-  private_cluster_enabled   = false
-  automatic_channel_upgrade = "stable"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  name                = "${var.project_name}-${local.aks_abbrevation}-${local.aks_profile}-${var.environment}-${var.location}-${local.kubernetes_instance_count}"
   default_node_pool {
     enable_auto_scaling = false
     node_count          = local.node_count

@@ -48,4 +48,7 @@ module "k8s" {
   client_certificate     = module.kubernetes.client_certificate
   client_key             = module.kubernetes.client_key
   cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
+  cluster_name           = module.kubernetes.cluster_name
+  resource_group_name    = azurerm_resource_group.this.name
+  environment            = local.environment
 }

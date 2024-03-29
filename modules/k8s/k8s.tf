@@ -6,13 +6,12 @@ provider "helm" {
     cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
   }
 }
-
 resource "helm_release" "cert_manager" {
   name       = "cert-manager"
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
   version    = "v1.14.0"
-
+  wait       = true
   set {
     name  = "installCRDs"
     value = "true"
@@ -39,15 +38,6 @@ resource "helm_release" "actions_runner_controller" {
   depends_on = [helm_release.cert_manager]
 }
 
-# self-hosted controller
-resource "null_resource" "self_hosted_runners" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
-  }
-
-  depends_on = [helm_release.actions_runner_controller]
-}
-
 resource "helm_release" "argocd" {
   name = "argocd"
 
@@ -60,14 +50,26 @@ resource "helm_release" "argocd" {
   values     = [file("${path.module}/values/argocd.yaml")]
   depends_on = [helm_release.cert_manager]
 }
+resource "null_resource" "local_exec" {
+  provisioner "local-exec" {
+    command = "az aks get-credentials --resource-group ${var.resource_group_name} --name ${var.cluster_name} --overwrite-existing"
+  }
+}
+# self-hosted controller
+resource "null_resource" "self_hosted_runners" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
+  }
 
+  depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
+}
 # ArgoCD Bootstrap the app of apps 
 resource "null_resource" "argocd_bootstrap" {
   provisioner "local-exec" {
     command = "kubectl apply -f ${path.module}/yaml/argocd.yaml"
   }
 
-  depends_on = [helm_release.argocd]
+  depends_on = [helm_release.argocd, null_resource.local_exec]
 }
 
 # resource "helm_release" "sonarqube_release" {

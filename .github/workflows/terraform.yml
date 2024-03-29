@@ -16,7 +16,7 @@ env:
 jobs:
   terraform_plan_dev:
     name: 'Terraform Plan dev'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: develop
     # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
@@ -63,7 +63,7 @@ jobs:
   terraform_apply_dev:
     name: 'Terraform Apply dev'
     needs: [terraform_plan_dev]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: develop
     
     defaults:
@@ -98,7 +98,7 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     needs: [terraform_apply_dev]
     name: 'Terraform Plan Test'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: develop
     # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
@@ -146,7 +146,7 @@ jobs:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     name: 'Terraform Apply Test'
     needs: [terraform_plan_test]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: develop
     
     defaults:
@@ -181,7 +181,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [terraform_apply_test]
     name: 'Terraform Plan Prod'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: develop
     # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
@@ -229,7 +229,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     name: 'Terraform Apply Prod'
     needs: [terraform_plan_prod]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: develop
     
     defaults:
