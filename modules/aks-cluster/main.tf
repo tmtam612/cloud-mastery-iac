@@ -17,15 +17,39 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   dns_prefix          = local.azure_kubernetes_abbrevation
 
   default_node_pool {
-    name       = local.default_node_pool_name
-    node_count = local.node_count
-    vm_size    = local.vm_size
+    name                = local.default_node_pool_name
+    node_count          = local.node_count
+    vm_size             = local.vm_size
+    type                = "VirtualMachineScaleSets"
+    enable_auto_scaling = true
+    min_count           = 1
+    max_count           = 3
+
+    node_labels = {
+      role = "general"
+    }
   }
 
+  # For production change to "Standard" 
+  sku_tier = "Free"
+
+  oidc_issuer_enabled       = true
+  workload_identity_enabled = true
+
+  network_profile {
+    network_plugin = "azure"
+    dns_service_ip = "10.0.64.10"
+    service_cidr   = "10.0.64.0/19"
+  }
   identity {
     type = local.identity_type
   }
-
+  lifecycle {
+    ignore_changes = [default_node_pool[0].node_count]
+  }
+  tags = {
+    env = var.environment
+  }
 }
 
 output "client_certificate" {
@@ -39,10 +63,3 @@ output "kube_config" {
   sensitive = true
 }
 
-#resource "azurerm_kubernetes_cluster_node_pool" "example" {
-#  name                  = "${var.project_name}-${local.node_pool_abbrevation}-${local.node_pool_profile}-${var.environment}-${var.location}-${var.instance_count}"
-#  kubernetes_cluster_id = azurerm_kubernetes_cluster.cluster.id
-#  vm_size               = local.vm_size
-#  node_count            = 1
-#
-#}

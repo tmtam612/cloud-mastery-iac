@@ -16,9 +16,11 @@ locals {
 
 
 resource "azurerm_kubernetes_cluster" "cluster" {
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  name                = "${var.project_name}-${local.aks_abbrevation}-${local.aks_profile}-${var.environment}-${var.location}-${local.kubernetes_instance_count}"
+  location                  = var.location
+  resource_group_name       = var.resource_group_name
+  name                      = "${var.project_name}-${local.aks_abbrevation}-${local.aks_profile}-${var.environment}-${var.location}-${local.kubernetes_instance_count}"
+  private_cluster_enabled   = false
+  automatic_channel_upgrade = "stable"
   default_node_pool {
     enable_auto_scaling = false
     node_count          = local.node_count
@@ -44,18 +46,3 @@ resource "azurerm_kubernetes_cluster" "cluster" {
 
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "name" {
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.cluster.id
-  vm_size               = local.vm_size
-  name                  = local.node_pool_name
-  enable_auto_scaling   = false
-  tags = {
-    env = var.environment
-  }
-  priority       = local.node_priority //spot node, cheaper but can be terminated by Azure anytime
-  spot_max_price = -1
-  lifecycle {
-    ignore_changes = [node_count]
-  }
-  #   vnet_subnet_id = var.
-}

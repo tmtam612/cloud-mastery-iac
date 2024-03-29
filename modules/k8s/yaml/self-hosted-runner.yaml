@@ -13,6 +13,7 @@ spec:
   template:
     spec:
       ephemeral: false
+      # organization: bios-msa-eet
       repository: tmtam612/cloud-mastery-iac
 ---
 apiVersion: actions.summerwind.dev/v1alpha1

@@ -32,7 +32,7 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 #   virtual_ip_address  = var.virtual_ip_address
 # }
 
-#config k8s cluster
+#config  cluster
 module "kubernetes" {
   source                 = "./modules/kubernetes"
   location               = local.location
@@ -41,4 +41,11 @@ module "kubernetes" {
   environment            = local.environment
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
+}
+module "k8s" {
+  source                 = "./modules/k8s"
+  host                   = module.kubernetes.host
+  client_certificate     = module.kubernetes.client_certificate
+  client_key             = module.kubernetes.client_key
+  cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
 }
