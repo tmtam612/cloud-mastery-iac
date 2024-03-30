@@ -9,6 +9,9 @@ env:
   ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUBSCRIPTION_ID}}
   ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
   ROOT_PATH: '${{github.workspace}}'
+  DEVELOP_WORKPLACE: 'develop'
+  ACCEPTANCE_WORKPLACE: 'acceptance'
+  PRODUCTION_WORKPLACE: 'production'
   ENVIRONMENT_DEV_TFVARS: '${{github.workspace}}/environment/dev.tfvars'
   ENVIRONMENT_TEST_TFVARS: '${{github.workspace}}/environment/test.tfvars'
   ENVIRONMENT_PROD_TFVARS: '${{github.workspace}}/environment/prod.tfvars'
@@ -39,6 +42,11 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
+
+    - name: Select Workspace
+      run: terraform workspace select ${{DEVELOP_WORKPLACE}} || terraform workspace new  ${{DEVELOP_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
+
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -84,7 +92,11 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
- 
+
+    - name: Select Workspace
+      run: terraform workspace select ${{DEVELOP_WORKPLACE}} || terraform workspace new  ${{DEVELOP_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
+
     - name: Terraform Init
       run: terraform init
       working-directory: ${{ env.ROOT_PATH }}
@@ -121,6 +133,10 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
+
+    - name: Select Workspace
+      run: terraform workspace select ${{ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{ACCEPTANCE_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -167,7 +183,11 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
- 
+
+    - name: Select Workspace
+      run: terraform workspace select ${{ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{ACCEPTANCE_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
+
     - name: Terraform Init
       run: terraform init
       working-directory: ${{ env.ROOT_PATH }}
@@ -204,6 +224,10 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
+
+    - name: Select Workspace
+      run: terraform workspace select ${{PRODUCTION_WORKPLACE}} || terraform workspace new  ${{PRODUCTION_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -250,7 +274,11 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
- 
+
+    - name: Select Workspace
+      run: terraform workspace select ${{PRODUCTION_WORKPLACE}} || terraform workspace new  ${{PRODUCTION_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
+
     - name: Terraform Init
       run: terraform init
       working-directory: ${{ env.ROOT_PATH }}

@@ -51,4 +51,5 @@ module "k8s" {
   cluster_name           = module.kubernetes.cluster_name
   resource_group_name    = azurerm_resource_group.this.name
   environment            = local.environment
+  k8s_depends_on         = [module.kubernetes.host]
 }

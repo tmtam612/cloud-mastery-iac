@@ -1,3 +1,12 @@
+
+variable "k8s_depends_on" {
+  # the value doesn't matter; we're just using this variable
+  # to propagate dependencies.
+  type    = any
+  default = []
+}
+
+
 provider "helm" {
   kubernetes {
     host                   = var.host
@@ -5,6 +14,13 @@ provider "helm" {
     client_key             = base64decode(var.client_key)
     cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
   }
+}
+
+resource "null_resource" "local_exec" {
+  provisioner "local-exec" {
+    command = "az aks get-credentials --resource-group ${var.resource_group_name} --name ${var.cluster_name} --overwrite-existing"
+  }
+  depends_on = [var.resource_group_name, var.cluster_name]
 }
 resource "helm_release" "cert_manager" {
   name       = "cert-manager"
@@ -16,6 +32,7 @@ resource "helm_release" "cert_manager" {
     name  = "installCRDs"
     value = "true"
   }
+  depends_on = [var.k8s_depends_on, null_resource.local_exec]
 }
 
 resource "helm_release" "actions_runner_controller" {
@@ -50,11 +67,7 @@ resource "helm_release" "argocd" {
   values     = [file("${path.module}/values/argocd.yaml")]
   depends_on = [helm_release.cert_manager]
 }
-resource "null_resource" "local_exec" {
-  provisioner "local-exec" {
-    command = "az aks get-credentials --resource-group ${var.resource_group_name} --name ${var.cluster_name} --overwrite-existing"
-  }
-}
+
 # self-hosted controller
 resource "null_resource" "self_hosted_runners" {
   provisioner "local-exec" {
