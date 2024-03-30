@@ -44,7 +44,7 @@ jobs:
         terraform_version: 1.7.3
 
     - name: Select Workspace
-      run: terraform workspace select ${{DEVELOP_WORKPLACE}} || terraform workspace new  ${{DEVELOP_WORKPLACE}}
+      run: terraform workspace select ${{env.DEVELOP_WORKPLACE}} || terraform workspace new  ${{env.DEVELOP_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
 
@@ -94,7 +94,7 @@ jobs:
         terraform_version: 1.7.3
 
     - name: Select Workspace
-      run: terraform workspace select ${{DEVELOP_WORKPLACE}} || terraform workspace new  ${{DEVELOP_WORKPLACE}}
+      run: terraform workspace select ${{env.DEVELOP_WORKPLACE}} || terraform workspace new  ${{env.DEVELOP_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Init
@@ -135,7 +135,7 @@ jobs:
         terraform_version: 1.7.3
 
     - name: Select Workspace
-      run: terraform workspace select ${{ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{ACCEPTANCE_WORKPLACE}}
+      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
@@ -185,7 +185,7 @@ jobs:
         terraform_version: 1.7.3
 
     - name: Select Workspace
-      run: terraform workspace select ${{ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{ACCEPTANCE_WORKPLACE}}
+      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Init
@@ -226,7 +226,7 @@ jobs:
         terraform_version: 1.7.3
 
     - name: Select Workspace
-      run: terraform workspace select ${{PRODUCTION_WORKPLACE}} || terraform workspace new  ${{PRODUCTION_WORKPLACE}}
+      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
@@ -276,7 +276,7 @@ jobs:
         terraform_version: 1.7.3
 
     - name: Select Workspace
-      run: terraform workspace select ${{PRODUCTION_WORKPLACE}} || terraform workspace new  ${{PRODUCTION_WORKPLACE}}
+      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Init
