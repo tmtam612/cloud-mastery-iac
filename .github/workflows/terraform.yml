@@ -16,6 +16,10 @@ env:
   ENVIRONMENT_TEST_TFVARS: '${{github.workspace}}/environment/test.tfvars'
   ENVIRONMENT_PROD_TFVARS: '${{github.workspace}}/environment/prod.tfvars'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   terraform_plan_dev:
     name: 'Terraform Plan dev'
@@ -338,7 +342,7 @@ jobs:
           az account show
           az group list
           pwd 
-          
+
     # https://github.com/actions/setup-node
     - name: Install Node.js
       uses: actions/setup-node@v2
