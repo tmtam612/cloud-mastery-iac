@@ -22,6 +22,11 @@ locals {
   argocd_namespace                           = var.k8s_combined_vars["argocd_namespace"]
   argocd_create_namespace                    = var.k8s_combined_vars["argocd_create_namespace"]
   argocd_version                             = var.k8s_combined_vars["argocd_version"]
+  ingress_name                               = var.k8s_combined_vars["ingress_name"]
+  ingress_repository                         = var.k8s_combined_vars["ingress_repository"]
+  ingress_chart                              = var.k8s_combined_vars["ingress_chart"]
+  ingress_namespace                          = var.k8s_combined_vars["ingress_namespace"]
+  ingress_create_namespace                   = var.k8s_combined_vars["ingress_create_namespace"]
 }
 
 provider "helm" {
@@ -72,6 +77,14 @@ resource "helm_release" "actions_runner_controller" {
   depends_on = [helm_release.cert_manager]
 }
 
+resource "helm_release" "ingress_nginx" {
+  name             = local.ingress_name
+  repository       = local.ingress_repository
+  chart            = local.ingress_chart
+  namespace        = local.ingress_namespace
+  create_namespace = local.ingress_create_namespace
+}
+
 resource "helm_release" "argocd" {
   name = local.argocd_name
 
@@ -100,6 +113,15 @@ resource "null_resource" "argocd_bootstrap" {
   }
 
   depends_on = [helm_release.argocd, null_resource.local_exec]
+}
+
+# ingress services 
+resource "null_resource" "ingress_service" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/yaml/ingress.yaml"
+  }
+
+  depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
 }
 
 # resource "helm_release" "sonarqube_release" {

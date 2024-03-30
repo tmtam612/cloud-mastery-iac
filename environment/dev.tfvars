@@ -161,4 +161,9 @@ k8s_combined_vars = {
   argocd_namespace                           = "devsecops"
   argocd_create_namespace                    = true
   argocd_version                             = "3.35.4"
+  ingress_name                               = "ingress-nginx"
+  ingress_repository                         = "https://kubernetes.github.io/ingress-nginx"
+  ingress_chart                              = "ingress-nginx"
+  ingress_namespace                          = "ingress-controller"
+  ingress_create_namespace                   = true
 }
