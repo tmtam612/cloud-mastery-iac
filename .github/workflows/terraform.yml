@@ -43,6 +43,18 @@ jobs:
       with:
         terraform_version: 1.7.3
 
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
@@ -80,6 +92,19 @@ jobs:
     steps:    
     - name: Checkout
       uses: actions/checkout@v3
+
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd 
 
     # https://github.com/actions/setup-node
     - name: Install Node.js
@@ -121,6 +146,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd 
     # https://github.com/actions/setup-node
     - name: Install Node.js
       uses: actions/setup-node@v2
@@ -133,13 +170,13 @@ jobs:
       with:
         terraform_version: 1.7.3
 
-    - name: Select Workspace
-      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
-
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
+      working-directory: ${{env.ROOT_PATH}}
+      
+    - name: Select Workspace
+      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     # Checks that all Terraform configuration files adhere to a canonical format
@@ -172,6 +209,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd 
+
     # https://github.com/actions/setup-node
     - name: Install Node.js
       uses: actions/setup-node@v2
@@ -183,13 +233,13 @@ jobs:
       with:
         terraform_version: 1.7.3
 
-    - name: Select Workspace
-      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
-
     - name: Terraform Init
       run: terraform init
       working-directory: ${{ env.ROOT_PATH }}
+
+    - name: Select Workspace
+      run: terraform workspace select ${{env.ACCEPTANCE_WORKPLACE}} || terraform workspace new  ${{env.ACCEPTANCE_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
@@ -212,6 +262,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd 
+
     # https://github.com/actions/setup-node
     - name: Install Node.js
       uses: actions/setup-node@v2
@@ -224,13 +287,13 @@ jobs:
       with:
         terraform_version: 1.7.3
 
-    - name: Select Workspace
-      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
-
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Select Workspace
+      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
       working-directory: ${{env.ROOT_PATH}}
 
     # Checks that all Terraform configuration files adhere to a canonical format
@@ -263,6 +326,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd 
+          
     # https://github.com/actions/setup-node
     - name: Install Node.js
       uses: actions/setup-node@v2
@@ -274,13 +350,13 @@ jobs:
       with:
         terraform_version: 1.7.3
 
-    - name: Select Workspace
-      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
-      working-directory: ${{env.ROOT_PATH}}
-
     - name: Terraform Init
       run: terraform init
       working-directory: ${{ env.ROOT_PATH }}
+      
+    - name: Select Workspace
+      run: terraform workspace select ${{env.PRODUCTION_WORKPLACE}} || terraform workspace new  ${{env.PRODUCTION_WORKPLACE}}
+      working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
