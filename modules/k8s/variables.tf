@@ -25,3 +25,14 @@ variable "resource_group_name" {
 variable "environment" {
   type = string
 }
+
+variable "k8s_combined_vars" {
+  type = map(string)
+}
+
+variable "k8s_depends_on" {
+  # the value doesn't matter; we're just using this variable
+  # to propagate dependencies.
+  type    = any
+  default = []
+}

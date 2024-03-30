@@ -1,11 +1,28 @@
-
-variable "k8s_depends_on" {
-  # the value doesn't matter; we're just using this variable
-  # to propagate dependencies.
-  type    = any
-  default = []
+locals {
+  cert_manager_name                          = var.k8s_combined_vars["cert_manager_name"]
+  cert_manager_repository                    = var.k8s_combined_vars["cert_manager_repository"]
+  cert_manager_chart                         = var.k8s_combined_vars["cert_manager_chart"]
+  cert_manager_version                       = var.k8s_combined_vars["cert_manager_version"]
+  cert_manager_wait                          = var.k8s_combined_vars["cert_manager_wait"]
+  cert_manager_set_name                      = var.k8s_combined_vars["cert_manager_set_name"]
+  cert_manager_set_value                     = var.k8s_combined_vars["cert_manager_set_value"]
+  actions_runner_controller_name             = var.k8s_combined_vars["actions_runner_controller_name"]
+  actions_runner_controller_repository       = var.k8s_combined_vars["actions_runner_controller_repository"]
+  actions_runner_controller_chart            = var.k8s_combined_vars["actions_runner_controller_chart"]
+  actions_runner_controller_namespace        = var.k8s_combined_vars["actions_runner_controller_namespace"]
+  actions_runner_controller_create_namespace = var.k8s_combined_vars["actions_runner_controller_create_namespace"]
+  actions_runner_controller_wait             = var.k8s_combined_vars["actions_runner_controller_wait"]
+  actions_runner_controller_set_name         = var.k8s_combined_vars["actions_runner_controller_set_name"]
+  actions_runner_controller_set_value        = var.k8s_combined_vars["actions_runner_controller_set_value"]
+  actions_runner_controller_set_github_name  = var.k8s_combined_vars["actions_runner_controller_set_github_name"]
+  actions_runner_controller_set_github_value = var.k8s_combined_vars["actions_runner_controller_set_github_value"]
+  argocd_name                                = var.k8s_combined_vars["argocd_name"]
+  argocd_repository                          = var.k8s_combined_vars["argocd_repository"]
+  argocd_chart                               = var.k8s_combined_vars["argocd_chart"]
+  argocd_namespace                           = var.k8s_combined_vars["argocd_namespace"]
+  argocd_create_namespace                    = var.k8s_combined_vars["argocd_create_namespace"]
+  argocd_version                             = var.k8s_combined_vars["argocd_version"]
 }
-
 
 provider "helm" {
   kubernetes {
@@ -23,52 +40,52 @@ resource "null_resource" "local_exec" {
   depends_on = [var.resource_group_name, var.cluster_name]
 }
 resource "helm_release" "cert_manager" {
-  name       = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  version    = "v1.14.0"
-  wait       = true
+  name       = local.cert_manager_name
+  repository = local.actions_runner_controller_chart
+  chart      = local.cert_manager_chart
+  version    = local.cert_manager_version
+  wait       = local.cert_manager_wait
   set {
-    name  = "installCRDs"
-    value = "true"
+    name  = local.cert_manager_set_name
+    value = local.cert_manager_set_value
   }
   depends_on = [var.k8s_depends_on, null_resource.local_exec]
 }
 
 resource "helm_release" "actions_runner_controller" {
-  name             = "actions-runner-controller"
-  repository       = "https://actions-runner-controller.github.io/actions-runner-controller"
-  chart            = "actions-runner-controller"
-  namespace        = "actions-runner-controller"
-  create_namespace = true
-  wait             = true
+  name             = local.actions_runner_controller_name
+  repository       = local.actions_runner_controller_repository
+  chart            = local.actions_runner_controller_chart
+  namespace        = local.actions_runner_controller_namespace
+  create_namespace = local.actions_runner_controller_create_namespace
+  wait             = local.actions_runner_controller_wait
 
   set {
-    name  = "authSecret.create"
-    value = "true"
+    name  = local.actions_runner_controller_set_name
+    value = local.actions_runner_controller_set_value
   }
 
   set {
-    name  = "authSecret.github_token"
-    value = "<your-PAT>"
+    name  = local.actions_runner_controller_set_github_name
+    value = local.actions_runner_controller_set_github_value
   }
   depends_on = [helm_release.cert_manager]
 }
 
 resource "helm_release" "argocd" {
-  name = "argocd"
+  name = local.argocd_name
 
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  namespace        = "argocd"
-  create_namespace = true
-  version          = "3.35.4"
+  repository       = local.argocd_repository
+  chart            = local.argocd_chart
+  namespace        = local.argocd_namespace
+  create_namespace = local.argocd_create_namespace
+  version          = local.argocd_version
 
   values     = [file("${path.module}/values/argocd.yaml")]
   depends_on = [helm_release.cert_manager]
 }
 
-# self-hosted controller
+# self-hosted runner
 resource "null_resource" "self_hosted_runners" {
   provisioner "local-exec" {
     command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"

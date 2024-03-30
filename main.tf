@@ -19,18 +19,25 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
   resource_group_name = azurerm_resource_group.this.name
 }
 
+resource "azurerm_role_assignment" "base" {
+  scope                = azurerm_resource_group.this.id
+  role_definition_name = var.user_assigned_role_definition_name
+  principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+}
 #config virtual network
-# module "network" {
-#   source              = "./modules/network"
-#   project_name        = local.project_name
-#   environment         = local.environment
-#   location            = local.location
-#   instance_count      = local.instance_count
-#   resource_group_name = azurerm_resource_group.this.name
-#   combined_vars       = var.vnet_combined_vars
-#   list_subnet         = var.list_subnet
-#   virtual_ip_address  = var.virtual_ip_address
-# }
+module "network" {
+  source                = "./modules/network"
+  project_name          = local.project_name
+  environment           = local.environment
+  location              = local.location
+  instance_count        = local.instance_count
+  resource_group_name   = azurerm_resource_group.this.name
+  combined_vars         = var.vnet_combined_vars
+  list_subnet           = var.list_subnet
+  main_address_space    = var.main_address_space
+  subnet1_address_space = var.subnet1_address_space
+  subnet2_address_space = var.subnet2_address_space
+}
 
 #config  cluster
 module "kubernetes" {
@@ -41,6 +48,7 @@ module "kubernetes" {
   environment            = local.environment
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
+  subnet_id              = module.network.subnet1_id
 }
 module "k8s" {
   source                 = "./modules/k8s"
@@ -52,4 +60,5 @@ module "k8s" {
   resource_group_name    = azurerm_resource_group.this.name
   environment            = local.environment
   k8s_depends_on         = [module.kubernetes.host]
+  k8s_combined_vars      = var.k8s_combined_vars
 }

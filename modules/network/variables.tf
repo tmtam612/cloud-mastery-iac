@@ -22,13 +22,19 @@ variable "combined_vars" {
   type = map(string)
 }
 
-variable "virtual_ip_address" {
-  type = list(string)
-}
-
 variable "list_subnet" {
   type = list(object({
     name           = string
     address_prefix = list(string)
   }))
+}
+
+variable "main_address_space" {
+  type = list(string)
+}
+variable "subnet1_address_space" {
+  type = list(string)
+}
+variable "subnet2_address_space" {
+  type = list(string)
 }

@@ -30,6 +30,10 @@ variable "user_assigned_identity_profile" {
   type = string
 }
 
+variable "user_assigned_role_definition_name" {
+  type = string
+}
+
 variable "vnet_combined_vars" {
   type = map(string)
   default = {
@@ -39,7 +43,13 @@ variable "vnet_combined_vars" {
     subnet_abbrevation          = ""
   }
 }
-variable "virtual_ip_address" {
+variable "main_address_space" {
+  type = list(string)
+}
+variable "subnet1_address_space" {
+  type = list(string)
+}
+variable "subnet2_address_space" {
   type = list(string)
 }
 
@@ -164,6 +174,35 @@ variable "aks_combined_vars" {
     default_node_name         = ""
     node_pool_name            = ""
     node_priority             = ""
+  }
+}
+
+variable "k8s_combined_vars" {
+  type = map(string)
+  default = {
+    cert_manager_name                          = ""
+    cert_manager_repository                    = ""
+    cert_manager_chart                         = ""
+    cert_manager_version                       = ""
+    cert_manager_wait                          = ""
+    cert_manager_set_name                      = ""
+    cert_manager_set_value                     = ""
+    actions_runner_controller_name             = ""
+    actions_runner_controller_repository       = ""
+    actions_runner_controller_chart            = ""
+    actions_runner_controller_namespace        = ""
+    actions_runner_controller_create_namespace = ""
+    actions_runner_controller_wait             = ""
+    actions_runner_controller_set_name         = ""
+    actions_runner_controller_set_value        = ""
+    actions_runner_controller_set_github_name  = ""
+    actions_runner_controller_set_github_value = ""
+    argocd_name                                = ""
+    argocd_repository                          = ""
+    argocd_chart                               = ""
+    argocd_namespace                           = ""
+    argocd_create_namespace                    = ""
+    argocd_version                             = ""
   }
 }
 

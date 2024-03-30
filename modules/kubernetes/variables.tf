@@ -18,6 +18,10 @@ variable "user_assigned_identity" {
   type = string
 }
 
+variable "subnet_id" {
+  type = string
+}
+
 variable "combined_vars" {
   type = map(string)
 }

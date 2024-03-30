@@ -1,8 +1,8 @@
 #local
-project_name   = "topx"
+project_name   = "cloud-mastery"
 environment    = "dev"
 region         = "westus3"
-instance_count = "001"
+instance_count = "1"
 
 #resource group
 resource_group_abbrevation = "rgs"
@@ -11,14 +11,18 @@ resource_group_profile     = "core"
 #user assigned identity
 user_assigned_identity_abbrevation = "uai"
 user_assigned_identity_profile     = "core"
-
+user_assigned_role_definition_name = "Network Contributor"
 #vnet
 vnet_combined_vars = {
   virtual_network_abbrevation = "vnet"
   virtual_network_profile     = "core"
   subnet_abbrevation          = "snet1"
+  subnet1                     = "subnet1"
+  subnet2                     = "subnet1"
 }
-virtual_ip_address = ["10.0.0.0/16"]
+main_address_space    = ["10.0.0.0/8"]
+subnet1_address_space = ["10.0.0.0/19"]
+subnet2_address_space = ["10.0.32.0/19"]
 list_subnet = [
   {
     name           = "subnet_account_service"
@@ -108,17 +112,53 @@ service_bus_combined_vars = {
 
 #aks
 aks_combined_vars = {
-  aks_abbrevation           = "aks"
-  aks_profile               = "core"
-  kubernetes_instance_count = 3
-  vm_size                   = "standard_b2s"
-  node_count                = 1
-  aks_dns_prefix            = "aksdnsprefix"
-  aks_identity_type         = "UserAssigned"
-  node_pool_abbrevation     = "np"
-  node_pool_profile         = "core"
-  node_pool_instance_count  = 1
-  default_node_name         = "defaultnode"
-  node_pool_name            = "topxnodepool"
-  node_priority             = "Spot"
+  aks_abbrevation                = "aks"
+  aks_profile                    = "core"
+  kubernetes_instance_count      = 3
+  vm_size                        = "standard_b2s"
+  node_count                     = 1
+  aks_dns_prefix                 = "aksdnsprefix"
+  aks_identity_type              = "UserAssigned"
+  default_node_name              = "defaultnode"
+  node_pool_name                 = "topxnodepool"
+  node_priority                  = "Spot"
+  sku_tier                       = "Free" //change to standard when on production
+  oidc_issuer_enabled            = true   //enable openID connect
+  workload_identity_enabled      = true   //enable workload identity
+  automatic_channel_upgrade      = "stable"
+  private_cluster_enabled        = false
+  enable_auto_scaling            = true
+  node_type                      = "VirtualMachineScaleSets"
+  min_count                      = 1
+  max_count                      = 10
+  network_profile_network_plugin = "azure"
+  network_profile_dns_service_ip = "10.0.64.10"
+  network_profile_service_cidr   = "10.0.64.0/19"
+}
+
+#k8s
+k8s_combined_vars = {
+  cert_manager_name                          = "cert-manager"
+  cert_manager_repository                    = "https://charts.jetstack.io"
+  cert_manager_chart                         = "cert-manager"
+  cert_manager_version                       = "v1.14.0"
+  cert_manager_wait                          = true
+  cert_manager_set_name                      = "installCRDs"
+  cert_manager_set_value                     = true
+  actions_runner_controller_name             = "actions-runner-controller"
+  actions_runner_controller_repository       = "https://actions-runner-controller.github.io/actions-runner-controller"
+  actions_runner_controller_chart            = "actions-runner-controller"
+  actions_runner_controller_namespace        = "self-hosted-runners"
+  actions_runner_controller_create_namespace = true
+  actions_runner_controller_wait             = true
+  actions_runner_controller_set_name         = "authSecret.create"
+  actions_runner_controller_set_value        = true
+  actions_runner_controller_set_github_name  = "authSecret.github_token"
+  actions_runner_controller_set_github_value = "<your-PAT>"
+  argocd_name                                = "argocd"
+  argocd_repository                          = "https://argoproj.github.io/argo-helm"
+  argocd_chart                               = "argo-cd"
+  argocd_namespace                           = "devsecops"
+  argocd_create_namespace                    = true
+  argocd_version                             = "3.35.4"
 }
