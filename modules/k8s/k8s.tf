@@ -58,9 +58,6 @@ resource "helm_release" "cert_manager" {
 }
 
 resource "helm_release" "actions_runner_controller" {
-  provisioner "local-exec" {
-    command = "helm repo update"
-  }
   name             = local.actions_runner_controller_name
   repository       = local.actions_runner_controller_repository
   chart            = local.actions_runner_controller_chart
@@ -81,9 +78,6 @@ resource "helm_release" "actions_runner_controller" {
 }
 
 resource "helm_release" "ingress_nginx" {
-  provisioner "local-exec" {
-    command = "helm repo update"
-  }
   name             = local.ingress_name
   repository       = local.ingress_repository
   chart            = local.ingress_chart
@@ -92,9 +86,6 @@ resource "helm_release" "ingress_nginx" {
 }
 
 resource "helm_release" "argocd" {
-  provisioner "local-exec" {
-    command = "helm repo update"
-  }
   name = local.argocd_name
 
   repository       = local.argocd_repository
