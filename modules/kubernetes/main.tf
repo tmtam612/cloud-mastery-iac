@@ -62,5 +62,6 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     identity_ids = [var.user_assigned_identity]
   }
 
+  depends_on = [var.subnet_id]
 }
 
