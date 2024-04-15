@@ -57,6 +57,15 @@ resource "helm_release" "cert_manager" {
   depends_on = [var.k8s_depends_on, null_resource.local_exec]
 }
 
+# CA cluster issuer
+resource "null_resource" "cluster_issuer" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/yaml/issuer.yaml"
+  }
+
+  depends_on = [null_resource.local_exec, helm_release.cert_manager]
+}
+
 resource "helm_release" "actions_runner_controller" {
   name             = local.actions_runner_controller_name
   repository       = local.actions_runner_controller_repository
@@ -83,6 +92,23 @@ resource "helm_release" "ingress_nginx" {
   chart            = local.ingress_chart
   namespace        = local.ingress_namespace
   create_namespace = local.ingress_create_namespace
+  set {
+    name  = "controller.service.annotations.service.beta.kubernetes.io/azure-dns-label-name"
+    value = "cloudmastery"
+  }
+  set {
+    name  = "controller.service.annotations.service.beta.kubernetes.io/azure-load-balancer-resource-group"
+    value = "topx-rg-backend-nonprod-eastus"
+  }
+  set {
+    name  = "controller.service.annotations.service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path"
+    value = "/healthz"
+  }
+  set {
+    name  = "controller.service.loadBalancerIP"
+    value = "4.236.56.78"
+  }
+  depends_on = [null_resource.local_exec, helm_release.cert_manager]
 }
 
 resource "helm_release" "argocd" {
@@ -118,7 +144,7 @@ resource "null_resource" "argocd_bootstrap" {
 # ingress services 
 resource "null_resource" "ingress_service" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/ingress.yaml"
+    command = "kubectl apply -f ${path.module}/yaml/microservices.yaml"
   }
 
   depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
