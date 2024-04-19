@@ -19,11 +19,12 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
   resource_group_name = azurerm_resource_group.this.name
 }
 
-# resource "azurerm_role_assignment" "base" {
-#   scope                = azurerm_resource_group.this.id
-#   role_definition_name = var.user_assigned_role_definition_name
-#   principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
-# }
+resource "azurerm_role_assignment" "base" {
+  scope                = data.azurerm_resource_group.ip_addresses_resource.id
+  role_definition_name = var.user_assigned_role_definition_name
+  principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+}
+
 #config virtual network
 module "network" {
   source                = "./modules/network"

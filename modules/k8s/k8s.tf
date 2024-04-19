@@ -44,6 +44,24 @@ resource "null_resource" "local_exec" {
   }
   depends_on = [var.resource_group_name, var.cluster_name]
 }
+
+resource "helm_release" "ingress_nginx" {
+  name             = local.ingress_name
+  repository       = local.ingress_repository
+  chart            = local.ingress_chart
+  namespace        = local.ingress_namespace
+  create_namespace = local.ingress_create_namespace
+  depends_on       = [null_resource.local_exec]
+}
+resource "null_resource" "upgrade_ingress_nginx" {
+  provisioner "local-exec" {
+    command = <<-EOF
+      helm upgrade ingress-nginx ingress-nginx/ingress-nginx --namespace ${local.ingress_namespace} --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"="cloudmastery.info" --set controller.service.loadBalancerIP=52.255.214.154 --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
+    EOF
+  }
+  depends_on = [var.resource_group_name, helm_release.ingress_nginx]
+}
+
 resource "helm_release" "cert_manager" {
   name       = local.cert_manager_name
   repository = local.cert_manager_repository
@@ -54,92 +72,67 @@ resource "helm_release" "cert_manager" {
     name  = local.cert_manager_set_name
     value = local.cert_manager_set_value
   }
-  depends_on = [var.k8s_depends_on, null_resource.local_exec]
+  depends_on = [var.k8s_depends_on, null_resource.local_exec, null_resource.upgrade_ingress_nginx]
 }
 
 # CA cluster issuer
 resource "null_resource" "cluster_issuer" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/issuer.yaml"
+    command = "kubectl apply -f ${path.module}/yaml/issuer.yaml --namespace ${local.ingress_namespace}"
   }
 
   depends_on = [null_resource.local_exec, helm_release.cert_manager]
 }
 
-resource "helm_release" "actions_runner_controller" {
-  name             = local.actions_runner_controller_name
-  repository       = local.actions_runner_controller_repository
-  chart            = local.actions_runner_controller_chart
-  namespace        = local.actions_runner_controller_namespace
-  create_namespace = local.actions_runner_controller_create_namespace
-  wait             = local.actions_runner_controller_wait
+# resource "helm_release" "actions_runner_controller" {
+#   name             = local.actions_runner_controller_name
+#   repository       = local.actions_runner_controller_repository
+#   chart            = local.actions_runner_controller_chart
+#   namespace        = local.actions_runner_controller_namespace
+#   create_namespace = local.actions_runner_controller_create_namespace
+#   wait             = local.actions_runner_controller_wait
 
-  set {
-    name  = local.actions_runner_controller_set_name
-    value = local.actions_runner_controller_set_value
-  }
+#   set {
+#     name  = local.actions_runner_controller_set_name
+#     value = local.actions_runner_controller_set_value
+#   }
 
-  set {
-    name  = local.actions_runner_controller_set_github_name
-    value = local.actions_runner_controller_set_github_value
-  }
-  depends_on = [helm_release.cert_manager]
-}
+#   set {
+#     name  = local.actions_runner_controller_set_github_name
+#     value = local.actions_runner_controller_set_github_value
+#   }
+#   depends_on = [helm_release.cert_manager]
+# }
 
-resource "helm_release" "ingress_nginx" {
-  name             = local.ingress_name
-  repository       = local.ingress_repository
-  chart            = local.ingress_chart
-  namespace        = local.ingress_namespace
-  create_namespace = local.ingress_create_namespace
-  set {
-    name  = "controller.service.annotations.service.beta.kubernetes.io/azure-dns-label-name"
-    value = "cloudmastery"
-  }
-  set {
-    name  = "controller.service.annotations.service.beta.kubernetes.io/azure-load-balancer-resource-group"
-    value = "topx-rg-backend-nonprod-eastus"
-  }
-  set {
-    name  = "controller.service.annotations.service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path"
-    value = "/healthz"
-  }
-  set {
-    name  = "controller.service.loadBalancerIP"
-    value = "4.236.56.78"
-  }
-  depends_on = [null_resource.local_exec, helm_release.cert_manager]
-}
+# resource "helm_release" "argocd" {
+#   name = local.argocd_name
 
-resource "helm_release" "argocd" {
-  name = local.argocd_name
+#   repository       = local.argocd_repository
+#   chart            = local.argocd_chart
+#   namespace        = local.argocd_namespace
+#   create_namespace = local.argocd_create_namespace
+#   version          = local.argocd_version
 
-  repository       = local.argocd_repository
-  chart            = local.argocd_chart
-  namespace        = local.argocd_namespace
-  create_namespace = local.argocd_create_namespace
-  version          = local.argocd_version
+#   values     = [file("${path.module}/values/argocd.yaml")]
+#   depends_on = [helm_release.cert_manager]
+# }
 
-  values     = [file("${path.module}/values/argocd.yaml")]
-  depends_on = [helm_release.cert_manager]
-}
+# # self-hosted runner
+# resource "null_resource" "self_hosted_runners" {
+#   provisioner "local-exec" {
+#     command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
+#   }
 
-# self-hosted runner
-resource "null_resource" "self_hosted_runners" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
-  }
+#   depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
+# }
+# # ArgoCD Bootstrap the app of apps 
+# resource "null_resource" "argocd_bootstrap" {
+#   provisioner "local-exec" {
+#     command = "kubectl apply -f ${path.module}/yaml/argocd.yaml"
+#   }
 
-  depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
-}
-# ArgoCD Bootstrap the app of apps 
-resource "null_resource" "argocd_bootstrap" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/argocd.yaml"
-  }
-
-  depends_on = [helm_release.argocd, null_resource.local_exec]
-}
+#   depends_on = [helm_release.argocd, null_resource.local_exec]
+# }
 
 # ingress services 
 resource "null_resource" "ingress_service" {

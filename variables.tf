@@ -22,6 +22,10 @@ variable "resource_group_profile" {
   type = string
 }
 
+variable "ip_address_resource_group" {
+  type = string
+}
+
 variable "user_assigned_identity_abbrevation" {
   type = string
 }
