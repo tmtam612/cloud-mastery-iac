@@ -14,6 +14,10 @@ variable "instance_count" {
   type = string
 }
 
+variable "dns_label" {
+  type = string
+}
+
 variable "resource_group_abbrevation" {
   type = string
 }

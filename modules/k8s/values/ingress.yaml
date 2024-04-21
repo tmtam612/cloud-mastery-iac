@@ -1,0 +1,14 @@
+---
+controller:
+  ingressClassResource:
+    name: nginx
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: /healthz
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: "topx-rg-backend-nonprod-eastus"
+      service.beta.kubernetes.io/azure-pip-name: "cloudmastery"
+      service.beta.kubernetes.io/azure-dns-label-name: "cloudmastery"
+  # Required for ACME
+  watchIngressWithoutClass: true
+  extraArgs:
+    ingress-class: nginx

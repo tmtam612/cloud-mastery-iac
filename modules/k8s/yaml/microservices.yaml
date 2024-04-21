@@ -32,7 +32,7 @@ spec:
         image: httpd
         imagePullPolicy: Always
         ports:
-        - containerPort: 6379
+        - containerPort: 8080
 
 ---
 apiVersion: v1
@@ -46,8 +46,7 @@ spec:
     app: hello-app
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 80
+      port: 80
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -75,7 +74,7 @@ spec:
               service:
                 name: hello-app-svc-bridge
                 port:
-                  number: 8080
+                  number: 80
 
 ---
 apiVersion: v1
@@ -87,4 +86,4 @@ spec:
   type: ExternalName
   externalName: hello-app-service.microservices.svc.cluster.local
   ports:
-  - port: 8080
+  - port: 80

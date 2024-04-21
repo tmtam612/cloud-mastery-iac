@@ -54,6 +54,9 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     network_plugin = local.network_profile_network_plugin
     dns_service_ip = local.network_profile_dns_service_ip
     service_cidr   = local.network_profile_service_cidr
+    load_balancer_profile {
+      outbound_ip_address_ids = [var.public_ip_address]
+    }
   }
   lifecycle {
     ignore_changes = [default_node_pool[0].node_count] //when auto scaling, node 0 will not be changed

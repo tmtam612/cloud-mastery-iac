@@ -46,20 +46,21 @@ resource "null_resource" "local_exec" {
 }
 
 resource "helm_release" "ingress_nginx" {
-  name             = local.ingress_name
-  repository       = local.ingress_repository
-  chart            = local.ingress_chart
-  namespace        = local.ingress_namespace
-  create_namespace = local.ingress_create_namespace
-  depends_on       = [null_resource.local_exec]
+  name             = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  namespace        = "ingress-controller"
+  create_namespace = true
+
+  values = [file("${path.module}/values/ingress.yaml")]
 }
 resource "null_resource" "upgrade_ingress_nginx" {
   provisioner "local-exec" {
     command = <<-EOF
-      helm upgrade ingress-nginx ingress-nginx/ingress-nginx --namespace ${local.ingress_namespace} --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"="cloudmastery.info" --set controller.service.loadBalancerIP=52.255.214.154 --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
+      kubectl label namespace ${local.ingress_namespace} cert-manager.io/disable-validation=true
     EOF
   }
-  depends_on = [var.resource_group_name, helm_release.ingress_nginx]
+  depends_on = [helm_release.ingress_nginx]
 }
 
 resource "helm_release" "cert_manager" {
@@ -68,17 +69,18 @@ resource "helm_release" "cert_manager" {
   chart      = local.cert_manager_chart
   version    = local.cert_manager_version
   wait       = local.cert_manager_wait
+  namespace  = local.ingress_namespace
   set {
     name  = local.cert_manager_set_name
     value = local.cert_manager_set_value
   }
-  depends_on = [var.k8s_depends_on, null_resource.local_exec, null_resource.upgrade_ingress_nginx]
+  depends_on = [null_resource.upgrade_ingress_nginx]
 }
 
 # CA cluster issuer
 resource "null_resource" "cluster_issuer" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/issuer.yaml --namespace ${local.ingress_namespace}"
+    command = "kubectl apply -f ${path.module}/yaml/issuer.yaml"
   }
 
   depends_on = [null_resource.local_exec, helm_release.cert_manager]

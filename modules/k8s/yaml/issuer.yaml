@@ -2,6 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-staging
+  namespace: ingress-controller
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
@@ -16,3 +17,22 @@ spec:
             spec:
               nodeSelector:
                 "kubernetes.io/os": linux
+---
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: letsencrypt-production
+# spec:
+#   acme:
+#     server: https://acme-v02.api.letsencrypt.org/directory
+#     email: tmtam612@gmail.com
+#     privateKeySecretRef:
+#       name: letsencrypt-production
+#     solvers:
+#     - http01:
+#         ingress:
+#           class: nginx
+#           podTemplate:
+#             spec:
+#               nodeSelector:
+#                 "kubernetes.io/os": linux

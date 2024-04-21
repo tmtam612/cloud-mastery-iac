@@ -3,7 +3,7 @@ project_name   = "cloud-mastery"
 environment    = "dev"
 region         = "westus3"
 instance_count = "1"
-
+dns_label      = "cloudmastery"
 #resource group
 resource_group_abbrevation = "rgs"
 resource_group_profile     = "core"

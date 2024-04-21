@@ -21,6 +21,9 @@ variable "user_assigned_identity" {
 variable "subnet_id" {
   type = string
 }
+variable "public_ip_address" {
+  type = string
+}
 
 variable "combined_vars" {
   type = map(string)

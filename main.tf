@@ -50,6 +50,7 @@ module "kubernetes" {
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
   subnet_id              = module.network.subnet1_id
+  public_ip_address      = data.azurerm_public_ip.ip_address.id
 }
 module "k8s" {
   source                 = "./modules/k8s"
