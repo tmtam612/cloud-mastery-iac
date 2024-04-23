@@ -63,6 +63,15 @@ resource "null_resource" "upgrade_ingress_nginx" {
   depends_on = [helm_release.ingress_nginx]
 }
 
+# ingress services 
+resource "null_resource" "ingress_service" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/yaml/microservices.yaml"
+  }
+
+  depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
+}
+
 resource "helm_release" "cert_manager" {
   name       = local.cert_manager_name
   repository = local.cert_manager_repository
@@ -135,15 +144,6 @@ resource "null_resource" "cluster_issuer" {
 
 #   depends_on = [helm_release.argocd, null_resource.local_exec]
 # }
-
-# ingress services 
-resource "null_resource" "ingress_service" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/yaml/microservices.yaml"
-  }
-
-  depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
-}
 
 # resource "helm_release" "sonarqube_release" {
 #   name = "sonarqube"
