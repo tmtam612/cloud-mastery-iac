@@ -1,7 +1,7 @@
 #local
 project_name   = "cloud-mastery"
 environment    = "dev"
-region         = "westus3"
+region         = "eastus"
 instance_count = "1"
 dns_label      = "cloudmastery"
 #resource group
