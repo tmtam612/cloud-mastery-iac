@@ -5,5 +5,5 @@ spec:
   destination:
     server: https://kubernetes.default.svc
   source:
-    repoURL: https://github.com/vominhvo/cloud-mastery-devops.git
+    repoURL: https://github.com/tmtam612/cloud-mastery-iac.git
     targetRevision: develop
