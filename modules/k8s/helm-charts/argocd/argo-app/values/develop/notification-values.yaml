@@ -8,7 +8,7 @@ image:
   repository: "cloudmasteryacrcoredeveastus1.azurecr.io/samples/hello-world"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
