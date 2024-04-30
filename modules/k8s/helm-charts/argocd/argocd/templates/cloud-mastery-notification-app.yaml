@@ -11,7 +11,7 @@ spec:
     server: {{ .Values.spec.destination.server }}
   project: {{ .Values.spec.project }}
   source:
-    path: helm-charts/cloud-mastery-app
+    path: modules/k8s/helm-charts/argocd/argo-app
     helm:
       valueFiles:
         - values/{{ .Values.environment }}/notification-values.yaml
