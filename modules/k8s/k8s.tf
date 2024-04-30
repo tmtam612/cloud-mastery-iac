@@ -52,7 +52,8 @@ resource "helm_release" "ingress_nginx" {
   namespace        = "ingress-controller"
   create_namespace = true
 
-  values = [file("${path.module}/values/ingress.yaml")]
+  values     = [file("${path.module}/values/ingress.yaml")]
+  depends_on = [null_resource.local_exec]
 }
 resource "null_resource" "upgrade_ingress_nginx" {
   provisioner "local-exec" {
@@ -115,18 +116,18 @@ resource "null_resource" "cluster_issuer" {
 #   depends_on = [helm_release.cert_manager]
 # }
 
-# resource "helm_release" "argocd" {
-#   name = local.argocd_name
+resource "helm_release" "argocd" {
+  name = local.argocd_name
 
-#   repository       = local.argocd_repository
-#   chart            = local.argocd_chart
-#   namespace        = local.argocd_namespace
-#   create_namespace = local.argocd_create_namespace
-#   version          = local.argocd_version
+  repository       = local.argocd_repository
+  chart            = local.argocd_chart
+  namespace        = local.argocd_namespace
+  create_namespace = local.argocd_create_namespace
+  version          = local.argocd_version
 
-#   values     = [file("${path.module}/values/argocd.yaml")]
-#   depends_on = [helm_release.cert_manager]
-# }
+  # values     = [file("${path.module}/values/argocd.yaml")]
+  depends_on = [null_resource.local_exec]
+}
 
 # # self-hosted runner
 # resource "null_resource" "self_hosted_runners" {

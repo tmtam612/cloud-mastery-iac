@@ -1,0 +1,9 @@
+environment: develop
+spec:
+  namespace: argocd
+  project: develop-project
+  destination:
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://github.com/vominhvo/cloud-mastery-devops.git
+    targetRevision: develop

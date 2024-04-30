@@ -1,23 +1,22 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: devsecops
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: dev-apps
-  namespace: devsecops
+  namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    path: dev/apps
-    repoURL: https://github.com/aminrj/10-gitops.git
-    targetRevision: HEAD
+    path: modules/k8s/helm-charts/argocd/argocd
+    helm:
+      valueFiles:
+       - values/develop-values
+      parameters: [ ]
+    repoURL: https://github.com/tmtam612/cloud-mastery-iac.git
+    targetRevision: develop
   destination:
-    namespace: default
+    namespace: argocd
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:
