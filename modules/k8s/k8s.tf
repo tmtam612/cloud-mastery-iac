@@ -129,6 +129,21 @@ resource "helm_release" "argocd" {
   depends_on = [null_resource.local_exec]
 }
 
+resource "null_resource" "export_git_url" {
+  provisioner "local-exec" {
+    command = "export GIT_URL=$(git config --get remote.origin.url)"
+  }
+  depends_on = [helm_release.argocd]
+}
+
+resource "null_resource" "export_execute_argo_app" {
+  provisioner "local-exec" {
+    command = "envsubst < modules/k8s/argocd/application/index.yaml | kubectl apply -n argocd -f -"
+  }
+  depends_on = [null_resource.export_git_url]
+}
+
+
 # # self-hosted runner
 # resource "null_resource" "self_hosted_runners" {
 #   provisioner "local-exec" {
