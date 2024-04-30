@@ -21,7 +21,20 @@ resource "azurerm_user_assigned_identity" "user_assigned_identity" {
 
 resource "azurerm_role_assignment" "base" {
   scope                = data.azurerm_resource_group.ip_addresses_resource.id
-  role_definition_name = var.user_assigned_role_definition_name
+  role_definition_name = var.network_contributor_role
+  principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+}
+
+resource "azurerm_container_registry" "acr" {
+  name                = "${var.acr_combined_vars.project_name_without_dash}${var.acr_combined_vars.acr_abbrevation}${var.acr_combined_vars.acr_profile}${var.environment}${local.location}${var.instance_count}"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = local.location
+  sku                 = var.acr_combined_vars.sku
+}
+
+resource "azurerm_role_assignment" "acr" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = var.default_contributor_role
   principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
 }
 

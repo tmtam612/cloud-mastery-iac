@@ -11,7 +11,8 @@ ip_address_resource_group  = "topx-rg-backend-nonprod-eastus"
 #user assigned identity
 user_assigned_identity_abbrevation = "uai"
 user_assigned_identity_profile     = "core"
-user_assigned_role_definition_name = "Network Contributor"
+network_contributor_role           = "Network Contributor"
+default_contributor_role           = "Contributor"
 #vnet
 vnet_combined_vars = {
   virtual_network_abbrevation = "vnet"
@@ -108,6 +109,16 @@ service_bus_combined_vars = {
   service_bus_queue_abbrevation = "sbq"
   service_bus_queue_profile     = "core"
   sku_name                      = "Standard"
+}
+
+#acr
+acr_combined_vars = {
+  project_name_without_dash = "cloudmastery"
+  acr_abbrevation           = "acr"
+  acr_profile               = "core"
+  sku                       = "Standard"
+  location                  = "East US"
+  zone_redundancy_enabled   = true
 }
 
 #aks

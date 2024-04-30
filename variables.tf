@@ -38,7 +38,11 @@ variable "user_assigned_identity_profile" {
   type = string
 }
 
-variable "user_assigned_role_definition_name" {
+variable "network_contributor_role" {
+  type = string
+}
+
+variable "default_contributor_role" {
   type = string
 }
 
@@ -153,7 +157,6 @@ variable "key_opts" {
   type = list(string)
 }
 
-
 variable "service_bus_combined_vars" {
   type = map(string)
   default = {
@@ -162,6 +165,18 @@ variable "service_bus_combined_vars" {
     service_bus_queue_abbrevation = ""
     service_bus_queue_profile     = ""
     sku_name                      = ""
+  }
+}
+
+variable "acr_combined_vars" {
+  type = map(string)
+  default = {
+    project_name_without_dash = ""
+    acr_abbrevation           = ""
+    acr_profile               = ""
+    sku                       = ""
+    location                  = ""
+    zone_redundancy_enabled   = ""
   }
 }
 
