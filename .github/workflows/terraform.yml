@@ -54,6 +54,19 @@ jobs:
       with:
         creds: '${{ secrets.AZURE_CREDENTIALS }}'
 
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+
+    - name: Install checkov
+      run: pip3 install checkov
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Install jq
+      run: sudo apt install -y jq
+      working-directory: ${{env.ROOT_PATH}}
+      
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
@@ -78,42 +91,13 @@ jobs:
       run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.8
-      
-
-    - name: Install checkov
-      run: pip3 install checkov
-      working-directory: ${{env.ROOT_PATH}}
-
-    - name: Install jq
-      run: sudo apt install -y jq
-      working-directory: ${{env.ROOT_PATH}}
-
     - name: create tfplan.json file
       run: terraform show -json tfplan.binary | jq > tfplan.json
-      working-directory: ${{env.ROOT_PATH}}
-
-    - name: test
-      run: cat tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
     - name: scanning
       run: checkov -f tfplan.json
       working-directory: ${{env.ROOT_PATH}}
-      # id: checkov
-      # uses: bridgecrewio/checkov-action@master
-      # with:
-      #     directory: ${{env.ROOT_PATH}}
-      #     # This will add both a CLI output to the console and create a results.sarif file
-      #     output_format: cli,sarif
-      #     output_file_path: console,results.sarif
-      #     file: ${{env.ROOT_PATH}}/tfplan.json
-      #     log_level: DEBUG
-      #     soft_fail: false
-      #     quiet: true
 
   terraform_apply_dev:
     name: 'Terraform Apply dev'
