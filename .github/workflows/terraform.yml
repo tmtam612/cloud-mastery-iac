@@ -85,6 +85,9 @@ jobs:
     - name: Install checkov
       run: pip3 install checkov
 
+    - name: Install jq
+      run: sudo apt install -y jq
+
     - name: create tfplan.json file
       run: terraform show -json tfplan.binary | jq > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
