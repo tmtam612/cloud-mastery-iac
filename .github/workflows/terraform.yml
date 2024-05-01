@@ -74,7 +74,11 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: scanning
+      run: terraform show -json tfplan.binary | jq > tfplan.json | checkov -f tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_dev:
