@@ -96,6 +96,8 @@ jobs:
           output_file_path: console,results.sarif
           file: ${{env.ROOT_PATH}}/tfplan.json
           log_level: DEBUG
+          soft_fail: false
+          quiet: true
 
   terraform_apply_dev:
     name: 'Terraform Apply dev'
