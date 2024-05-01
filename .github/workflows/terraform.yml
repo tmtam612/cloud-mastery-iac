@@ -77,9 +77,25 @@ jobs:
       run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: scanning
-      run: terraform show -json tfplan.binary | jq > tfplan.json | checkov -f tfplan.json
+    # - name: Set up Python 3.8
+    #     uses: actions/setup-python@v4
+    #     with:
+    #       python-version: 3.8
+
+    - name: create tfplan.json file
+      uses: terraform show -json tfplan.binary | jq > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
+
+    - name: scanning
+      id: checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+          directory: ${{env.ROOT_PATH}}
+          framework: terraform
+          # This will add both a CLI output to the console and create a results.sarif file
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+          file: ${{env.ROOT_PATH}}/tfplan.json
 
   terraform_apply_dev:
     name: 'Terraform Apply dev'
