@@ -83,7 +83,7 @@ jobs:
     #       python-version: 3.8
 
     - name: create tfplan.json file
-      run: terraform show -json tfplan.binary | jq > tfplan.json
+      run: terraform show -json tfplan.binary | > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
     - name: scanning
