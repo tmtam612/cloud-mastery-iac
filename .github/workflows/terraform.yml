@@ -92,7 +92,7 @@ jobs:
       working-directory: ${{env.ROOT_PATH}}
 
     - name: create tfplan.json file
-      run: terraform show -json tfplan.binary > tfplan.json
+      run: terraform show -json tfplan.binary | jq > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
     - name: test
