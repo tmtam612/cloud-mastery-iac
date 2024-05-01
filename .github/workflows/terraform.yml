@@ -66,7 +66,7 @@ jobs:
     - name: Install jq
       run: sudo apt install -y jq
       working-directory: ${{env.ROOT_PATH}}
-      
+
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
@@ -91,11 +91,11 @@ jobs:
       run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: create tfplan.json file
+    - name: Create tfplan.json file
       run: terraform show -json tfplan.binary | jq > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: scanning
+    - name: Scanning
       run: checkov -f tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
@@ -174,6 +174,7 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
+        terraform_wrapper: false
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -196,8 +197,16 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_TEST_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_TEST_TFVARS}} --out tfplan.binary
       working-directory: ${{env.ROOT_PATH}}
+
+    - name: Create tfplan.json file
+      run: terraform show -json tfplan.binary | jq > tfplan.json
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Scanning
+      run: checkov -f tfplan.json
+      working-directory: ${{env.ROOT_PATH}}  
 
   terraform_apply_test:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
@@ -275,6 +284,7 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.7.3
+        terraform_wrapper: false
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -297,7 +307,15 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_PROD_TFVARS}}
+      run: terraform plan --var-file=${{env.ENVIRONMENT_PROD_TFVARS}} --out tfplan.binary
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Create tfplan.json file
+      run: terraform show -json tfplan.binary | jq > tfplan.json
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Scanning
+      run: checkov -f tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_prod:
