@@ -60,6 +60,7 @@ module "kubernetes" {
   resource_group_name    = azurerm_resource_group.this.name
   project_name           = local.project_name
   environment            = local.environment
+  instance_count         = local.instance_count
   combined_vars          = var.aks_combined_vars
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
   subnet_id              = module.network.subnet1_id
@@ -67,14 +68,17 @@ module "kubernetes" {
   depends_on             = [azurerm_role_assignment.base]
 }
 module "k8s" {
-  source                 = "./modules/k8s"
-  host                   = module.kubernetes.host
-  client_certificate     = module.kubernetes.client_certificate
-  client_key             = module.kubernetes.client_key
-  cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
-  cluster_name           = module.kubernetes.cluster_name
-  resource_group_name    = azurerm_resource_group.this.name
-  environment            = local.environment
-  k8s_depends_on         = [module.kubernetes.host]
-  k8s_combined_vars      = var.k8s_combined_vars
+  source                   = "./modules/k8s"
+  host                     = module.kubernetes.host
+  client_certificate       = module.kubernetes.client_certificate
+  client_key               = module.kubernetes.client_key
+  cluster_ca_certificate   = module.kubernetes.cluster_ca_certificate
+  cluster_name             = module.kubernetes.cluster_name
+  resource_group_name      = azurerm_resource_group.this.name
+  environment              = local.environment
+  k8s_depends_on           = [module.kubernetes.host]
+  k8s_combined_vars        = var.k8s_combined_vars
+  public_ip_resource_group = var.ip_address_resource_group
+  public_ip_name           = var.cloudmastery_public_ip_address_name
+  public_ip_dns            = var.cloudmastery_dns_label
 }

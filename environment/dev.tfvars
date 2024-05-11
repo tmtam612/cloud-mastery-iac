@@ -1,9 +1,12 @@
 #local
-project_name   = "cloud-mastery"
-environment    = "dev"
-region         = "eastus"
-instance_count = "1"
-dns_label      = "cloudmastery"
+project_name                        = "cloud-mastery"
+environment                         = "dev"
+region                              = "eastus"
+instance_count                      = "2"
+cloudmastery_dns_label              = "cloudmastery"
+cloudmastery_public_ip_address_name = "cloudmastery"
+topxteam_dns_label                  = "topx-team"
+topxteam_public_ip_address_name     = "topx-team"
 #resource group
 resource_group_abbrevation = "rgs"
 resource_group_profile     = "core"
@@ -22,8 +25,8 @@ vnet_combined_vars = {
   subnet2                     = "subnet1"
 }
 main_address_space    = ["10.0.0.0/8"]
-subnet1_address_space = ["10.0.0.0/19"]
-subnet2_address_space = ["10.0.32.0/19"]
+subnet1_address_space = ["10.0.32.0/19"]
+subnet2_address_space = ["10.0.128.0/19"]
 list_subnet = [
   {
     name           = "subnet_account_service"
@@ -128,7 +131,8 @@ aks_combined_vars = {
   kubernetes_instance_count      = 3
   vm_size                        = "standard_b2s"
   node_count                     = 1
-  aks_dns_prefix                 = "cloudmastery"
+  aks_cloudmastery_dns_prefix    = "cloudmastery"
+  aks_topx_team_dns_prefix       = "topx-team"
   aks_identity_type              = "UserAssigned"
   default_node_name              = "defaultnode"
   node_pool_name                 = "topxnodepool"

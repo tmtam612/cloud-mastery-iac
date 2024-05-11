@@ -26,6 +26,17 @@ variable "environment" {
   type = string
 }
 
+variable "public_ip_resource_group" {
+  type = string
+}
+
+variable "public_ip_name" {
+  type = string
+}
+variable "public_ip_dns" {
+  type = string
+}
+
 variable "k8s_combined_vars" {
   type = map(string)
 }

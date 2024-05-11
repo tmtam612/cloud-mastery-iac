@@ -14,6 +14,10 @@ variable "project_name" {
   type = string
 }
 
+variable "instance_count" {
+  type = string
+}
+
 variable "user_assigned_identity" {
   type = string
 }

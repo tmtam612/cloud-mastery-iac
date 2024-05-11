@@ -14,7 +14,19 @@ variable "instance_count" {
   type = string
 }
 
-variable "dns_label" {
+variable "topxteam_dns_label" {
+  type = string
+}
+
+variable "cloudmastery_dns_label" {
+  type = string
+}
+
+variable "cloudmastery_public_ip_address_name" {
+  type = string
+}
+
+variable "topxteam_public_ip_address_name" {
   type = string
 }
 
@@ -183,20 +195,18 @@ variable "acr_combined_vars" {
 variable "aks_combined_vars" {
   type = map(string)
   default = {
-    aks_abbrevation           = ""
-    aks_profile               = ""
-    vm_size                   = ""
-    node_count                = ""
-    aks_dns_prefix            = ""
-    aks_identity_type         = ""
-    network_plugin            = ""
-    kubernetes_instance_count = ""
-    node_pool_instance_count  = ""
-    node_pool_profile         = ""
-    node_pool_abbrevation     = ""
-    default_node_name         = ""
-    node_pool_name            = ""
-    node_priority             = ""
+    aks_abbrevation       = ""
+    aks_profile           = ""
+    vm_size               = ""
+    node_count            = ""
+    aks_dns_prefix        = ""
+    aks_identity_type     = ""
+    network_plugin        = ""
+    node_pool_profile     = ""
+    node_pool_abbrevation = ""
+    default_node_name     = ""
+    node_pool_name        = ""
+    node_priority         = ""
   }
 }
 

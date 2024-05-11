@@ -1,10 +1,10 @@
 locals {
-  kubernetes_instance_count      = var.combined_vars["kubernetes_instance_count"]
   aks_abbrevation                = var.combined_vars["aks_abbrevation"]
   aks_profile                    = var.combined_vars["aks_profile"]
   vm_size                        = var.combined_vars["vm_size"]
   node_count                     = var.combined_vars["node_count"]
-  aks_dns_prefix                 = var.combined_vars["aks_dns_prefix"]
+  aks_cloudmastery_dns_prefix    = var.combined_vars["aks_cloudmastery_dns_prefix"]
+  aks_topx_team_dns_prefix       = var.combined_vars["aks_topx_team_dns_prefix"]
   aks_identity_type              = var.combined_vars["aks_identity_type"]
   default_node_name              = var.combined_vars["default_node_name"]
   node_pool_name                 = var.combined_vars["node_pool_name"]
@@ -21,14 +21,14 @@ locals {
   network_profile_network_plugin = var.combined_vars["network_profile_network_plugin"]
   network_profile_dns_service_ip = var.combined_vars["network_profile_dns_service_ip"]
   network_profile_service_cidr   = var.combined_vars["network_profile_service_cidr"]
-  node_resource_group_name       = "${var.project_name}-${var.environment}-${local.node_pool_name}"
+  node_resource_group_name       = "${var.project_name}-${var.environment}-${local.node_pool_name}-${var.instance_count}"
 }
 
 
 resource "azurerm_kubernetes_cluster" "cluster" {
   location            = var.location
   resource_group_name = var.resource_group_name
-  name                = "${var.project_name}-${local.aks_abbrevation}-${local.aks_profile}-${var.environment}-${var.location}-${local.kubernetes_instance_count}"
+  name                = "${var.project_name}-${local.aks_abbrevation}-${local.aks_profile}-${var.environment}-${var.location}-${var.instance_count}"
   default_node_pool {
     node_count          = local.node_count
     vm_size             = local.vm_size
@@ -39,7 +39,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     max_count           = local.max_count
     vnet_subnet_id      = var.subnet_id
   }
-  dns_prefix                = local.aks_dns_prefix
+  dns_prefix                = local.aks_cloudmastery_dns_prefix
   sku_tier                  = local.sku_tier                  //change to standard when on production
   oidc_issuer_enabled       = local.oidc_issuer_enabled       //enable openID connect
   workload_identity_enabled = local.workload_identity_enabled //enable workload identity
