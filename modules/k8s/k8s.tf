@@ -27,6 +27,10 @@ locals {
   ingress_chart                              = var.k8s_combined_vars["ingress_chart"]
   ingress_namespace                          = var.k8s_combined_vars["ingress_namespace"]
   ingress_create_namespace                   = var.k8s_combined_vars["ingress_create_namespace"]
+  storage_account_name                       = "topxsanonprod"
+  container_name                             = "letsencrypt-staging"
+  blob_name                                  = "letsencrypt-staging.yaml"
+  secret_name                                = "letsencrypt-staging"
 }
 
 provider "helm" {
@@ -38,41 +42,6 @@ provider "helm" {
   }
 }
 
-# data "azurerm_storage_blob" "existing_issuer" {
-#   count                  = 1
-#   name                   = "letsencrypt-staging.yaml"
-#   storage_container_name = "letsencrypt-staging"
-#   storage_account_name   = "topxsanonprod"
-# }
-# locals {
-#   blob_error = try(data.azurerm_storage_blob.existing_issuer, null)
-# }
-# data "azurerm_resource_group" "rg" {
-#   name = "topx-rg-backend-nonprod-eastus"
-# }
-# data "azurerm_storage_container" "existing_container" {
-#   name                 = "letsencrypt-staging"
-#   storage_account_name = "topxsanonprod"
-# }
-# data "azurerm_storage_account" "storage_account" {
-#   name                = "topxsanonprod"
-#   resource_group_name = "topx-rg-backend-nonprod-eastus"
-# }
-# data "azapi_resource_action" "ds" {
-#   type                   = "Microsoft.Storage/storageAccounts/blobServices/containers@2023-04-01"
-#   resource_id            = data.azurerm_storage_container.existing_container.id
-#   method                 = "GET"
-#   response_export_values = ["*"]
-# }
-# locals {
-#   resource_list = jsondecode(data.azapi_resource_action.ds.output).value # getting the list of blob
-
-#   blob = [for stg in local.resource_list : stg.name if lower(stg.name) == lower("letsencrypt-staging.yaml")] # getting the blob
-
-
-#   # Checking to create the storage account or not
-#   createBlob = local.blob == null || local.blob == [] ? true : false
-# }
 resource "null_resource" "local_exec" {
   provisioner "local-exec" {
     command = "az aks get-credentials --resource-group ${var.resource_group_name} --name ${var.cluster_name} --overwrite-existing"
@@ -102,29 +71,22 @@ resource "null_resource" "app_conf" {
   #   interpreter = ["bash", "-c"]
   # }
   provisioner "local-exec" {
+    # command     = <<-EOT
+    #   blob_exist=$(az storage blob exists --account-name ${local.storage_account_name} --container-name ${local.container_name} --name ${local.blob_name})
+    #   if [[ $(echo "$blob_exist" | jq -r '.exists') == "true" ]]; then
+    #       az storage blob download --account-name ${local.storage_account_name} --container-name ${local.container_name} --name ${local.blob_name} --file secret.yaml
+    #       kubectl apply -f secret.yaml --validate=false
+    #   else
+    #       kubectl apply -f ${path.module}/yaml/issuer.yaml --validate=false
+    #       kubectl get secrets ${local.secret_name} -o yaml > secret.yaml
+    #       az storage blob upload --account-name ${local.storage_account_name} --container-name ${local.container_name} --file secret.yaml --name ${local.blob_name} --overwrite
+    #   fi
+    #   EOT
     command     = <<-EOT
-      swapoff -a
-      systemctl start crio
-      systemctl start kubelet.service
-      systemctl stop firewalld.service
-      export KUBECONFIG=/etc/kubernetes/admin.conf
-      blob_exist=$(az storage blob list -c $container_name --account-name $storage_account_name | jq -e '.[]|select(.name=="letsencrypt-staging.yaml").name')
-      if [ -z "$blob_exist" ]; then
-          kubectl apply -f ${path.module}/yaml/issuer.yaml --validate=false
-          kubectl get secrets $secret_name -o yaml > secret.yaml
-          az storage blob upload --account-name $storage_account_name --container-name $container_name --file secret.yaml --name $blob_name --overwrite
-      else
-          az storage blob download --account-name $storage_account_name --container-name $container_name --name $blob_name --file secret.yaml
-          kubectl apply -f secret.yaml --validate=false
-      fi
-      EOT
+      chmod +x ${path.module}/cert.sh
+      ./cert.sh ${path.module}
+    EOT
     interpreter = ["bash", "-c"]
-    environment = {
-      storage_account_name = "topxsanonprod"
-      container_name       = "letsencrypt-staging"
-      blob_name            = "letsencrypt-staging.yaml"
-      secret_name          = "letsencrypt-staging"
-    }
   }
   # provisioner "local-exec" {
   #     when = destroy
