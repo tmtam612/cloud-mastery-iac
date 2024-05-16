@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: tls-secret
+  namespace: ingress-service
+spec:
+  # name of the tls secret to store
+  # the generated certificate/key pair
+  secretName: tls-secret
+  isCA: true
+  issuerRef:
+    # issuer created in step 1
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  dnsNames:
+  # one or more fully-qualified domain name
+  # can be defined here
+  # - argocd.cloudmastery.info
+  # - hello-world.cloudmastery.info
+  - "*.cloudmastery.info"

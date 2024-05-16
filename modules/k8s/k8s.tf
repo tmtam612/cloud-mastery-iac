@@ -1,38 +1,3 @@
-locals {
-  cert_manager_name                          = var.k8s_combined_vars["cert_manager_name"]
-  cert_manager_repository                    = var.k8s_combined_vars["cert_manager_repository"]
-  cert_manager_chart                         = var.k8s_combined_vars["cert_manager_chart"]
-  cert_manager_version                       = var.k8s_combined_vars["cert_manager_version"]
-  cert_manager_wait                          = var.k8s_combined_vars["cert_manager_wait"]
-  cert_manager_set_name                      = var.k8s_combined_vars["cert_manager_set_name"]
-  cert_manager_set_value                     = var.k8s_combined_vars["cert_manager_set_value"]
-  actions_runner_controller_name             = var.k8s_combined_vars["actions_runner_controller_name"]
-  actions_runner_controller_repository       = var.k8s_combined_vars["actions_runner_controller_repository"]
-  actions_runner_controller_chart            = var.k8s_combined_vars["actions_runner_controller_chart"]
-  actions_runner_controller_namespace        = var.k8s_combined_vars["actions_runner_controller_namespace"]
-  actions_runner_controller_create_namespace = var.k8s_combined_vars["actions_runner_controller_create_namespace"]
-  actions_runner_controller_wait             = var.k8s_combined_vars["actions_runner_controller_wait"]
-  actions_runner_controller_set_name         = var.k8s_combined_vars["actions_runner_controller_set_name"]
-  actions_runner_controller_set_value        = var.k8s_combined_vars["actions_runner_controller_set_value"]
-  actions_runner_controller_set_github_name  = var.k8s_combined_vars["actions_runner_controller_set_github_name"]
-  actions_runner_controller_set_github_value = var.k8s_combined_vars["actions_runner_controller_set_github_value"]
-  argocd_name                                = var.k8s_combined_vars["argocd_name"]
-  argocd_repository                          = var.k8s_combined_vars["argocd_repository"]
-  argocd_chart                               = var.k8s_combined_vars["argocd_chart"]
-  argocd_namespace                           = var.k8s_combined_vars["argocd_namespace"]
-  argocd_create_namespace                    = var.k8s_combined_vars["argocd_create_namespace"]
-  argocd_version                             = var.k8s_combined_vars["argocd_version"]
-  ingress_name                               = var.k8s_combined_vars["ingress_name"]
-  ingress_repository                         = var.k8s_combined_vars["ingress_repository"]
-  ingress_chart                              = var.k8s_combined_vars["ingress_chart"]
-  ingress_namespace                          = var.k8s_combined_vars["ingress_namespace"]
-  ingress_create_namespace                   = var.k8s_combined_vars["ingress_create_namespace"]
-  storage_account_name                       = "topxsanonprod"
-  container_name                             = "letsencrypt-staging"
-  blob_name                                  = "letsencrypt-staging.yaml"
-  secret_name                                = "letsencrypt-staging"
-}
-
 provider "helm" {
   kubernetes {
     host                   = var.host
@@ -52,112 +17,74 @@ resource "null_resource" "local_exec" {
 
 
 resource "helm_release" "cert_manager" {
-  name       = local.cert_manager_name
-  repository = local.cert_manager_repository
-  chart      = local.cert_manager_chart
-  version    = local.cert_manager_version
-  wait       = local.cert_manager_wait
-  namespace  = local.ingress_namespace
+  name       = var.k8s_combined_vars["cert_manager_name"]
+  repository = var.k8s_combined_vars["cert_manager_repository"]
+  chart      = var.k8s_combined_vars["cert_manager_chart"]
+  version    = var.k8s_combined_vars["cert_manager_version"]
+  wait       = var.k8s_combined_vars["cert_manager_wait"]
+  namespace  = var.k8s_combined_vars["ingress_namespace"]
+  create_namespace = true
   set {
-    name  = local.cert_manager_set_name
-    value = local.cert_manager_set_value
+    name  = var.k8s_combined_vars["cert_manager_set_name"]
+    value = var.k8s_combined_vars["cert_manager_set_value"]
   }
   depends_on = [null_resource.local_exec]
 }
 ## Create App Configuration using an external script
-resource "null_resource" "app_conf" {
-  # provisioner "local-exec" {
-  #   command     = "./${path.module}/cert.sh ${self.triggers.storage_account_name} ${self.triggers.container_name} ${self.triggers.blob_name} ${self.triggers.secret_name}"
-  #   interpreter = ["bash", "-c"]
-  # }
+resource "null_resource" "create_cert" {
   provisioner "local-exec" {
-    # command     = <<-EOT
-    #   blob_exist=$(az storage blob exists --account-name ${local.storage_account_name} --container-name ${local.container_name} --name ${local.blob_name})
-    #   if [[ $(echo "$blob_exist" | jq -r '.exists') == "true" ]]; then
-    #       az storage blob download --account-name ${local.storage_account_name} --container-name ${local.container_name} --name ${local.blob_name} --file secret.yaml
-    #       kubectl apply -f secret.yaml --validate=false
-    #   else
-    #       kubectl apply -f ${path.module}/yaml/issuer.yaml --validate=false
-    #       kubectl get secrets ${local.secret_name} -o yaml > secret.yaml
-    #       az storage blob upload --account-name ${local.storage_account_name} --container-name ${local.container_name} --file secret.yaml --name ${local.blob_name} --overwrite
-    #   fi
-    #   EOT
     command     = <<-EOT
       chmod +x ${path.module}/cert.sh
-      ./cert.sh ${path.module}
+      ${path.module}/cert.sh ${path.module} ${var.backend_storge_account_name} ${var.backend_container_name} ${var.backend_blob_name}
     EOT
     interpreter = ["bash", "-c"]
   }
-  # provisioner "local-exec" {
-  #     when = destroy
-  #     command = "./cert.sh ${self.triggers.storage_account_name} ${self.triggers.container_name} ${self.triggers.blob_name} ${self.triggers.secret_name}" 
-  #     interpreter = ["bash", "-c"]
-  # }
 
   depends_on = [
     helm_release.cert_manager
   ]
 }
 
-# resource "null_resource" "create_secret_from_blob" {
-#   count = local.createBlob ? 0 : 1
+resource "null_resource" "wait_for_certificate" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      container_exist=$(az storage container exists --account-name ${var.backend_storge_account_name} --name ${var.backend_container_name})
+      blob_exist=$(az storage blob exists --account-name ${var.backend_storge_account_name} --container-name ${var.backend_container_name} --name ${var.backend_blob_name})
+      if [[ $(echo "$blob_exist" | jq -r '.exists') == "false" ]] || [[ $(echo "$container_exist" | jq -r '.exists') == "false" ]]; then
+        until kubectl get secret ${var.backend_secret_name} -n ${var.backend_secret_namespace}; do
+          echo "Waiting for certificate issuance..."
+          sleep 10
+        done
+        kubectl get secrets ${var.backend_secret_name} -o yaml -n ${var.backend_secret_namespace} > secret.yaml
+        az storage blob upload --account-name ${var.backend_storge_account_name} --container-name ${var.backend_container_name} --file secret.yaml --name ${var.backend_blob_name} --overwrite
+      fi
+    EOT
+    interpreter = ["bash", "-c"]
+  }
 
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       az storage blob download --account-name topxsanonprod --container-name letsencrypt-staging --name letsencrypt-staging.yaml --file secret.yaml &&
-#       kubectl apply -f secret.yaml
-#     EOT
-#   }
-# }
-# # CA cluster issuer
-# resource "null_resource" "cluster_issuer" {
-#   count = local.createBlob ? 1 : 0
-#   provisioner "local-exec" {
-#     command = "kubectl apply -f ${path.module}/yaml/issuer.yaml"
-#   }
-
-#   depends_on = [null_resource.local_exec, helm_release.cert_manager]
-# }
-
-# resource "null_resource" "get_secret_and_upload" {
-#   count = local.createBlob ? 1 : 0
-
-#   provisioner "local-exec" {
-#     command = "kubectl get secrets letsencrypt-staging -o yaml > secret.yaml"
-#   }
-
-#   provisioner "local-exec" {
-#     command = "az storage blob upload --account-name topxsanonprod --container-name letsencrypt-staging --file secret.yaml --name letsencrypt-staging.yaml"
-#   }
-#   depends_on = [null_resource.cluster_issuer]
-# }
+  depends_on = [
+    null_resource.create_cert,
+    null_resource.ingress_service
+  ]
+}
 
 resource "helm_release" "ingress_nginx" {
-  name             = "ingress-nginx"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  namespace        = "ingress-controller"
+  name             = var.k8s_combined_vars["ingress_name"]
+  repository       = var.k8s_combined_vars["ingress_repository"]
+  chart            = var.k8s_combined_vars["ingress_chart"]
+  namespace        = var.k8s_combined_vars["ingress_namespace"]
   create_namespace = true
-
-  # set {
-  #   name  = "controller.service.annotations.\"service.beta.kubernetes.io/azure-load-balancer-resource-group\""
-  #   value = var.public_ip_resource_group
-  # }
-  # set {
-  #   name  = "controller.service.annotations.\"service.beta.kubernetes.io/azure-pip-name\""
-  #   value = var.public_ip_name
-  # }
-  # set {
-  #   name  = "controller.service.annotations.\"service.beta.kubernetes.io/azure-dns-label-name\""
-  #   value = var.public_ip_dns
-  # }
-  values     = [file("${path.module}/values/ingress.yaml")]
+  values = [templatefile("${path.module}/values/ingress.yaml", {
+    resource_group = "${var.public_ip_resource_group}"
+    pip_name       = "${var.public_ip_name}"
+    dns_name       = "${var.public_ip_dns}"
+  })]
   depends_on = [null_resource.local_exec]
 }
 resource "null_resource" "upgrade_ingress_nginx" {
   provisioner "local-exec" {
     command = <<-EOF
-      kubectl label namespace ${local.ingress_namespace} cert-manager.io/disable-validation=true
+      kubectl label namespace ${var.k8s_combined_vars["ingress_namespace"]} cert-manager.io/disable-validation=true
     EOF
   }
   depends_on = [helm_release.ingress_nginx]
@@ -172,68 +99,37 @@ resource "null_resource" "ingress_service" {
   depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
 }
 
-# resource "azurerm_storage_blob" "secret_blob" {
-#   name                   = "letsencrypt-staging.yaml"
-#   storage_container_name = "letsencrypt-staging"
-#   storage_account_name   = "topxsanonprod"
-#   type                   = "Block"
-#   source                 = "secret.yaml"
-# }
+resource "helm_release" "argocd" {
+  name = var.k8s_combined_vars["argocd_name"]
+  count = var.k8s_combined_vars["argocd_installed_flag"]
+  repository       = var.k8s_combined_vars["argocd_repository"]
+  chart            = var.k8s_combined_vars["argocd_chart"]
+  namespace        = var.k8s_combined_vars["argocd_namespace"]
+  create_namespace = var.k8s_combined_vars["argocd_create_namespace"]
+  version          = var.k8s_combined_vars["argocd_version"]
 
-# resource "helm_release" "cert_manager" {
-#   name       = local.cert_manager_name
-#   repository = local.cert_manager_repository
-#   chart      = local.cert_manager_chart
-#   version    = local.cert_manager_version
-#   wait       = local.cert_manager_wait
-#   namespace  = local.ingress_namespace
-#   set {
-#     name  = local.cert_manager_set_name
-#     value = local.cert_manager_set_value
-#   }
-#   depends_on = [null_resource.upgrade_ingress_nginx]
-# }
-
-# CA cluster issuer
-# resource "null_resource" "cluster_issuer" {
-#   provisioner "local-exec" {
-#     command = "kubectl apply -f ${path.module}/yaml/issuer.yaml"
-#   }
-
-#   depends_on = [null_resource.local_exec, helm_release.cert_manager]
-# }
+  # values     = [file("${path.module}/values/argocd.yaml")]
+  depends_on = [null_resource.local_exec, helm_release.ingress_nginx]
+}
 
 # resource "helm_release" "actions_runner_controller" {
-#   name             = local.actions_runner_controller_name
-#   repository       = local.actions_runner_controller_repository
-#   chart            = local.actions_runner_controller_chart
-#   namespace        = local.actions_runner_controller_namespace
-#   create_namespace = local.actions_runner_controller_create_namespace
-#   wait             = local.actions_runner_controller_wait
+#   name             = var.k8s_combined_vars["actions_runner_controller_name"]
+#   repository       = var.k8s_combined_vars["actions_runner_controller_repository"]
+#   chart            = var.k8s_combined_vars["actions_runner_controller_chart"]
+#   namespace        = var.k8s_combined_vars["actions_runner_controller_namespace"]
+#   create_namespace = var.k8s_combined_vars["actions_runner_controller_create_namespace"]
+#   wait             = var.k8s_combined_vars["actions_runner_controller_wait"]
 
 #   set {
-#     name  = local.actions_runner_controller_set_name
-#     value = local.actions_runner_controller_set_value
+#     name  = var.k8s_combined_vars["actions_runner_controller_set_name"]
+#     value = var.k8s_combined_vars["actions_runner_controller_set_value"]
 #   }
 
 #   set {
-#     name  = local.actions_runner_controller_set_github_name
-#     value = local.actions_runner_controller_set_github_value
+#     name  = var.k8s_combined_vars["actions_runner_controller_set_github_name"]
+#     value = var.k8s_combined_vars["actions_runner_controller_set_github_value"]
 #   }
 #   depends_on = [helm_release.cert_manager]
-# }
-
-# resource "helm_release" "argocd" {
-#   name = local.argocd_name
-
-#   repository       = local.argocd_repository
-#   chart            = local.argocd_chart
-#   namespace        = local.argocd_namespace
-#   create_namespace = local.argocd_create_namespace
-#   version          = local.argocd_version
-
-#   # values     = [file("${path.module}/values/argocd.yaml")]
-#   depends_on = [null_resource.local_exec]
 # }
 
 # resource "null_resource" "export_git_url" {
@@ -253,6 +149,7 @@ resource "null_resource" "ingress_service" {
 
 # # self-hosted runner
 # resource "null_resource" "self_hosted_runners" {
+#   count = var.k8s_combined_vars["actions_runner_controller_installed_flag"] 
 #   provisioner "local-exec" {
 #     command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
 #   }

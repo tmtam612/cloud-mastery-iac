@@ -67,6 +67,20 @@ module "kubernetes" {
   public_ip_address      = data.azurerm_public_ip.ip_address.id
   depends_on             = [azurerm_role_assignment.base]
 }
+
+data "azurerm_user_assigned_identity" "node_pool" {
+  depends_on = [ module.kubernetes ]
+  resource_group_name = "${local.project_name}-${local.environment}-${var.aks_combined_vars["node_pool_name"]}-${local.instance_count}"
+  name = "${local.project_name}-${var.aks_combined_vars["aks_abbrevation"]}-${var.aks_combined_vars["aks_profile"]}-${local.environment}-${local.location}-${local.instance_count}-agentpool"
+}
+
+resource "azurerm_role_assignment" "acr_agentpool" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = var.default_contributor_role
+  principal_id         = data.azurerm_user_assigned_identity.node_pool.principal_id
+  depends_on = [ module.kubernetes ]
+}
+
 module "k8s" {
   source                   = "./modules/k8s"
   host                     = module.kubernetes.host
@@ -81,4 +95,10 @@ module "k8s" {
   public_ip_resource_group = var.ip_address_resource_group
   public_ip_name           = var.cloudmastery_public_ip_address_name
   public_ip_dns            = var.cloudmastery_dns_label
+  backend_storge_account_name = var.backend_storge_account_name
+  backend_container_name = var.backend_container_name
+  backend_blob_name = var.backend_blob_name
+  backend_secret_name = var.backend_secret_name
+  backend_secret_namespace = var.backend_secret_namespace
 }
+

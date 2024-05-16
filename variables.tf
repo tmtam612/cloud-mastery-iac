@@ -42,6 +42,26 @@ variable "ip_address_resource_group" {
   type = string
 }
 
+variable "backend_storge_account_name" {
+  type = string
+}
+
+variable "backend_container_name" {
+  type = string
+}
+
+variable "backend_blob_name" {
+  type = string
+}
+
+variable "backend_secret_name" {
+  type = string
+}
+
+variable "backend_secret_namespace" {
+  type = string
+}
+
 variable "user_assigned_identity_abbrevation" {
   type = string
 }
