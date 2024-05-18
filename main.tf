@@ -26,6 +26,7 @@ resource "azurerm_role_assignment" "base" {
 }
 
 resource "azurerm_container_registry" "acr" {
+  count               = var.acr_combined_vars.create_acr
   name                = "${var.acr_combined_vars.project_name_without_dash}${var.acr_combined_vars.acr_abbrevation}${var.acr_combined_vars.acr_profile}${var.environment}${local.location}${var.instance_count}"
   resource_group_name = azurerm_resource_group.this.name
   location            = local.location
@@ -33,6 +34,7 @@ resource "azurerm_container_registry" "acr" {
 }
 
 resource "azurerm_role_assignment" "acr" {
+  count                = var.acr_combined_vars.create_acr
   scope                = azurerm_container_registry.acr.id
   role_definition_name = var.default_contributor_role
   principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
@@ -68,17 +70,23 @@ module "kubernetes" {
   depends_on             = [azurerm_role_assignment.base]
 }
 
-data "azurerm_user_assigned_identity" "node_pool" {
-  depends_on = [ module.kubernetes ]
-  resource_group_name = "${local.project_name}-${local.environment}-${var.aks_combined_vars["node_pool_name"]}-${local.instance_count}"
-  name = "${local.project_name}-${var.aks_combined_vars["aks_abbrevation"]}-${var.aks_combined_vars["aks_profile"]}-${local.environment}-${local.location}-${local.instance_count}-agentpool"
-}
-
 resource "azurerm_role_assignment" "acr_agentpool" {
   scope                = azurerm_container_registry.acr.id
   role_definition_name = var.default_contributor_role
-  principal_id         = data.azurerm_user_assigned_identity.node_pool.principal_id
-  depends_on = [ module.kubernetes ]
+  principal_id         = module.kubernetes.node_pool_identity_principal_id
+  depends_on           = [ module.kubernetes ]
+}
+
+resource "azurerm_dns_zone" "dns_zone" {
+  name                = var.dns_zone
+  resource_group_name = azurerm_resource_group.this.name
+}
+
+resource "azurerm_role_assignment" "dns_contributor" {
+  scope                            = azurerm_dns_zone.dns_zone.id
+  role_definition_name             = var.dns_contributor_role
+  principal_id                     = module.kubernetes.kube_object_id
+  skip_service_principal_aad_check = true # Allows skipping propagation of identity to ensure assignment succeeds.
 }
 
 module "k8s" {
@@ -91,14 +99,17 @@ module "k8s" {
   resource_group_name      = azurerm_resource_group.this.name
   environment              = local.environment
   k8s_depends_on           = [module.kubernetes.host]
-  k8s_combined_vars        = var.k8s_combined_vars
-  public_ip_resource_group = var.ip_address_resource_group
-  public_ip_name           = var.cloudmastery_public_ip_address_name
-  public_ip_dns            = var.cloudmastery_dns_label
-  backend_storge_account_name = var.backend_storge_account_name
-  backend_container_name = var.backend_container_name
-  backend_blob_name = var.backend_blob_name
-  backend_secret_name = var.backend_secret_name
-  backend_secret_namespace = var.backend_secret_namespace
+  k8s_combined_vars        = merge(var.k8s_combined_vars, {
+      public_ip_resource_group    = var.ip_address_resource_group
+      public_ip_name              = var.public_ip_address_name
+      public_ip_dns               = var.dns_label
+      dns_zone                    = var.dns_zone
+      identity_client_id          = module.kubernetes.node_pool_identity_client_id
+      backend_storge_account_name = var.backend_storge_account_name
+      backend_container_name      = var.backend_container_name
+      backend_blob_name           = var.backend_blob_name
+      backend_secret_name         = var.backend_secret_name
+      backend_secret_namespace    = var.backend_secret_namespace
+  })
 }
 

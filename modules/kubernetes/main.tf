@@ -12,7 +12,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     max_count           = var.combined_vars["max_count"]
     vnet_subnet_id      = var.subnet_id
   }
-  dns_prefix                = var.combined_vars["aks_cloudmastery_dns_prefix"]
+  dns_prefix                = var.combined_vars["aks_dns_prefix"]
   sku_tier                  = var.combined_vars["sku_tier"]                  //change to standard when on production
   oidc_issuer_enabled       = var.combined_vars["oidc_issuer_enabled"]       //enable openID connect
   workload_identity_enabled = var.combined_vars["workload_identity_enabled"] //enable workload identity

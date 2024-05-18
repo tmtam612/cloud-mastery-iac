@@ -1,26 +1,26 @@
 #local
-project_name                        = "cloud-mastery"
+project_name                        = "txt"
 environment                         = "dev"
 region                              = "eastus"
-instance_count                      = "2"
-cloudmastery_dns_label              = "cloudmastery"
-cloudmastery_public_ip_address_name = "cloudmastery"
-topxteam_dns_label                  = "topx-team"
-topxteam_public_ip_address_name     = "topx-team"
+instance_count                      = "1"
+dns_zone                            = "topx.team"
+dns_label                           = "topx-team"
+public_ip_address_name              = "topx.team"
+dns_contributor_role                = "DNS Zone Contributor"
 #resource group
-resource_group_abbrevation = "rgs"
-resource_group_profile     = "core"
-ip_address_resource_group  = "topx-rg-backend-nonprod-eastus"
-backend_storge_account_name = "topxsanonprod"
-backend_container_name = "letsencrypt-staging"
-backend_blob_name = "tls-secret.yaml"
-backend_secret_name = "tls-secret"
-backend_secret_namespace = "ingress-service"
+resource_group_abbrevation          = "rgs"
+resource_group_profile              = "core"
+ip_address_resource_group           = "topx-rg-backend-nonprod-eastus"
+backend_storge_account_name         = "topxsanonprod"
+backend_container_name              = "letsencrypt-staging"
+backend_blob_name                   = "tls-secret.yaml"
+backend_secret_name                 = "tls-secret"
+backend_secret_namespace            = "ingress-service"
 #user assigned identity
-user_assigned_identity_abbrevation = "uai"
-user_assigned_identity_profile     = "core"
-network_contributor_role           = "Network Contributor"
-default_contributor_role           = "Contributor"
+user_assigned_identity_abbrevation  = "uai"
+user_assigned_identity_profile      = "core"
+network_contributor_role            = "Network Contributor"
+default_contributor_role            = "Contributor"
 #vnet
 vnet_combined_vars = {
   virtual_network_abbrevation = "vnet"
@@ -121,7 +121,8 @@ service_bus_combined_vars = {
 
 #acr
 acr_combined_vars = {
-  project_name_without_dash = "cloudmastery"
+  create_acr                = 0
+  project_name_without_dash = "txt"
   acr_abbrevation           = "acr"
   acr_profile               = "core"
   sku                       = "Standard"
@@ -136,8 +137,7 @@ aks_combined_vars = {
   kubernetes_instance_count      = 3
   vm_size                        = "standard_b2s"
   node_count                     = 1
-  aks_cloudmastery_dns_prefix    = "cloudmastery"
-  aks_topx_team_dns_prefix       = "topx-team"
+  aks_dns_prefix                 = "topx-team"
   aks_identity_type              = "UserAssigned"
   default_node_name              = "defaultnode"
   node_pool_name                 = "topxnodepool"
@@ -158,6 +158,7 @@ aks_combined_vars = {
 
 #k8s
 k8s_combined_vars = {
+  defautl_namespace                          = "default"
   cert_manager_name                          = "cert-manager"
   cert_manager_repository                    = "https://charts.jetstack.io"
   cert_manager_chart                         = "cert-manager"
@@ -182,7 +183,7 @@ k8s_combined_vars = {
   argocd_namespace                           = "argocd"
   argocd_create_namespace                    = true
   argocd_version                             = "3.35.4"
-  argocd_installed_flag                      = 1
+  argocd_installed_flag                      = 0
   ingress_name                               = "ingress-nginx"
   ingress_repository                         = "https://kubernetes.github.io/ingress-nginx"
   ingress_chart                              = "ingress-nginx"

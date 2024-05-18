@@ -14,19 +14,19 @@ variable "instance_count" {
   type = string
 }
 
-variable "topxteam_dns_label" {
+variable "dns_zone" {
   type = string
 }
 
-variable "cloudmastery_dns_label" {
+variable "dns_label" {
   type = string
 }
 
-variable "cloudmastery_public_ip_address_name" {
+variable "public_ip_address_name" {
   type = string
 }
 
-variable "topxteam_public_ip_address_name" {
+variable "dns_contributor_role" {
   type = string
 }
 
@@ -203,6 +203,7 @@ variable "service_bus_combined_vars" {
 variable "acr_combined_vars" {
   type = map(string)
   default = {
+    create_acr                = ""
     project_name_without_dash = ""
     acr_abbrevation           = ""
     acr_profile               = ""

@@ -22,7 +22,7 @@ resource "helm_release" "cert_manager" {
   chart      = var.k8s_combined_vars["cert_manager_chart"]
   version    = var.k8s_combined_vars["cert_manager_version"]
   wait       = var.k8s_combined_vars["cert_manager_wait"]
-  namespace  = var.k8s_combined_vars["ingress_namespace"]
+  namespace  = var.k8s_combined_vars["defautl_namespace"]
   create_namespace = true
   set {
     name  = var.k8s_combined_vars["cert_manager_set_name"]
@@ -30,14 +30,16 @@ resource "helm_release" "cert_manager" {
   }
   depends_on = [null_resource.local_exec]
 }
-## Create App Configuration using an external script
-resource "null_resource" "create_cert" {
+
+#Add a Federated Identity
+resource "null_resource" "create_cluster_issuer" {
   provisioner "local-exec" {
-    command     = <<-EOT
-      chmod +x ${path.module}/cert.sh
-      ${path.module}/cert.sh ${path.module} ${var.backend_storge_account_name} ${var.backend_container_name} ${var.backend_blob_name}
-    EOT
-    interpreter = ["bash", "-c"]
+    command = <<-EOT
+      export dns_zone_name=${var.k8s_combined_vars["dns_zone"]}
+      export resource_group=${var.resource_group_name}
+      export clientID=${var.k8s_combined_vars["identity_client_id"]}
+      envsubst < ${path.module}/yaml/issuer.yaml | kubectl apply -n argocd -f -
+      EOT
   }
 
   depends_on = [
@@ -45,26 +47,18 @@ resource "null_resource" "create_cert" {
   ]
 }
 
-resource "null_resource" "wait_for_certificate" {
+## Create App Configuration using an external script
+resource "null_resource" "create_cert" {
   provisioner "local-exec" {
-    command = <<-EOT
-      container_exist=$(az storage container exists --account-name ${var.backend_storge_account_name} --name ${var.backend_container_name})
-      blob_exist=$(az storage blob exists --account-name ${var.backend_storge_account_name} --container-name ${var.backend_container_name} --name ${var.backend_blob_name})
-      if [[ $(echo "$blob_exist" | jq -r '.exists') == "false" ]] || [[ $(echo "$container_exist" | jq -r '.exists') == "false" ]]; then
-        until kubectl get secret ${var.backend_secret_name} -n ${var.backend_secret_namespace}; do
-          echo "Waiting for certificate issuance..."
-          sleep 10
-        done
-        kubectl get secrets ${var.backend_secret_name} -o yaml -n ${var.backend_secret_namespace} > secret.yaml
-        az storage blob upload --account-name ${var.backend_storge_account_name} --container-name ${var.backend_container_name} --file secret.yaml --name ${var.backend_blob_name} --overwrite
-      fi
+    command     = <<-EOT
+      chmod +x ${path.module}/cert.sh
+      ${path.module}/cert.sh ${path.module} ${var.k8s_combined_vars["backend_storge_account_name"]} ${var.k8s_combined_vars["backend_container_name"]} ${var.k8s_combined_vars["backend_blob_name"]}
     EOT
     interpreter = ["bash", "-c"]
   }
 
   depends_on = [
-    null_resource.create_cert,
-    null_resource.ingress_service
+    helm_release.cert_manager
   ]
 }
 
@@ -75,9 +69,9 @@ resource "helm_release" "ingress_nginx" {
   namespace        = var.k8s_combined_vars["ingress_namespace"]
   create_namespace = true
   values = [templatefile("${path.module}/values/ingress.yaml", {
-    resource_group = "${var.public_ip_resource_group}"
-    pip_name       = "${var.public_ip_name}"
-    dns_name       = "${var.public_ip_dns}"
+    resource_group = "${var.k8s_combined_vars["public_ip_resource_group"]}"
+    pip_name       = "${var.k8s_combined_vars["public_ip_name"]}"
+    dns_name       = "${var.k8s_combined_vars["public_ip_dns"]}"
   })]
   depends_on = [null_resource.local_exec]
 }
@@ -96,12 +90,13 @@ resource "null_resource" "ingress_service" {
     command = "kubectl apply -f ${path.module}/yaml/microservices.yaml"
   }
 
-  depends_on = [helm_release.ingress_nginx, null_resource.local_exec]
+  # depends_on = [helm_release.ingress_nginx, null_resource.create_cert]
+  depends_on = [helm_release.ingress_nginx]
 }
 
 resource "helm_release" "argocd" {
-  name = var.k8s_combined_vars["argocd_name"]
-  count = var.k8s_combined_vars["argocd_installed_flag"]
+  name             = var.k8s_combined_vars["argocd_name"]
+  count            = var.k8s_combined_vars["argocd_installed_flag"]
   repository       = var.k8s_combined_vars["argocd_repository"]
   chart            = var.k8s_combined_vars["argocd_chart"]
   namespace        = var.k8s_combined_vars["argocd_namespace"]
@@ -109,7 +104,7 @@ resource "helm_release" "argocd" {
   version          = var.k8s_combined_vars["argocd_version"]
 
   # values     = [file("${path.module}/values/argocd.yaml")]
-  depends_on = [null_resource.local_exec, helm_release.ingress_nginx]
+  depends_on       = [null_resource.local_exec, helm_release.ingress_nginx]
 }
 
 # resource "helm_release" "actions_runner_controller" {
