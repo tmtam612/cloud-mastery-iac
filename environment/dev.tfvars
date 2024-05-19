@@ -5,7 +5,7 @@ region                 = "eastus"
 instance_count         = "1"
 dns_zone               = "topx.team"
 dns_label              = "topx-team"
-public_ip_address_name = "topx.team"
+public_ip_address_name = "cloudmastery"
 dns_contributor_role   = "DNS Zone Contributor"
 #resource group
 resource_group_abbrevation  = "rgs"
