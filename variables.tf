@@ -14,7 +14,19 @@ variable "instance_count" {
   type = string
 }
 
+variable "dns_zone" {
+  type = string
+}
+
 variable "dns_label" {
+  type = string
+}
+
+variable "public_ip_address_name" {
+  type = string
+}
+
+variable "dns_contributor_role" {
   type = string
 }
 
@@ -27,6 +39,26 @@ variable "resource_group_profile" {
 }
 
 variable "ip_address_resource_group" {
+  type = string
+}
+
+variable "backend_storge_account_name" {
+  type = string
+}
+
+variable "backend_container_name" {
+  type = string
+}
+
+variable "backend_blob_name" {
+  type = string
+}
+
+variable "backend_secret_name" {
+  type = string
+}
+
+variable "backend_secret_namespace" {
   type = string
 }
 
@@ -171,6 +203,7 @@ variable "service_bus_combined_vars" {
 variable "acr_combined_vars" {
   type = map(string)
   default = {
+    create_acr                = ""
     project_name_without_dash = ""
     acr_abbrevation           = ""
     acr_profile               = ""
@@ -183,20 +216,18 @@ variable "acr_combined_vars" {
 variable "aks_combined_vars" {
   type = map(string)
   default = {
-    aks_abbrevation           = ""
-    aks_profile               = ""
-    vm_size                   = ""
-    node_count                = ""
-    aks_dns_prefix            = ""
-    aks_identity_type         = ""
-    network_plugin            = ""
-    kubernetes_instance_count = ""
-    node_pool_instance_count  = ""
-    node_pool_profile         = ""
-    node_pool_abbrevation     = ""
-    default_node_name         = ""
-    node_pool_name            = ""
-    node_priority             = ""
+    aks_abbrevation       = ""
+    aks_profile           = ""
+    vm_size               = ""
+    node_count            = ""
+    aks_dns_prefix        = ""
+    aks_identity_type     = ""
+    network_plugin        = ""
+    node_pool_profile     = ""
+    node_pool_abbrevation = ""
+    default_node_name     = ""
+    node_pool_name        = ""
+    node_priority         = ""
   }
 }
 
