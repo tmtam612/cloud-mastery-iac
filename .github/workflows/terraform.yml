@@ -65,11 +65,8 @@ jobs:
 
     - name: Install Trivy
       run: |
-        sudo apt-get install wget apt-transport-https gnupg
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install trivy
+        wget https://github.com/aquasecurity/trivy/releases/download/v0.31.3/trivy_0.31.3_Linux-64bit.deb
+        sudo dpkg -i trivy_0.31.3_Linux-64bit.deb
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Install jq
