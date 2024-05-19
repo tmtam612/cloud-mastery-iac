@@ -63,30 +63,19 @@ jobs:
       run: pip3 install checkov
       working-directory: ${{env.ROOT_PATH}}
 
+    - name: Install checkov
+      run: |
+        sudo apt-get install wget apt-transport-https gnupg
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
+      working-directory: ${{env.ROOT_PATH}}
+
     - name: Install jq
       run: sudo apt install -y jq
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Run Trivy vulnerability scanner in IaC mode
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'config'
-        hide-progress: true
-        output: trivy.txt
-
-    - name: Publish Trivy Output to Summary
-      run: |
-        if [[ -s trivy.txt ]]; then
-          {
-            echo "### Security Output"
-            echo "<details><summary>Click to expand</summary>"
-            echo ""
-            echo '```terraform'
-            cat trivy.txt
-            echo '```'
-            echo "</details>"
-          } >> $GITHUB_STEP_SUMMARY
-        fi
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       run: terraform init
@@ -115,7 +104,11 @@ jobs:
       run: terraform show -json tfplan.binary | jq > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Scanning
+    - name: Scanning with trivy
+      run: trivy conf tfplan.json
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Scanning with checkov
       run: checkov -f tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
