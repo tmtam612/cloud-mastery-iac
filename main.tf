@@ -38,7 +38,7 @@ resource "azurerm_role_assignment" "acr" {
   scope                = azurerm_container_registry.acr.0.id
   role_definition_name = var.default_contributor_role
   principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
-  depends_on = [ azurerm_container_registry.acr ]
+  depends_on           = [azurerm_container_registry.acr]
 }
 
 #config virtual network
@@ -76,7 +76,7 @@ resource "azurerm_role_assignment" "acr_agentpool" {
   scope                = azurerm_container_registry.acr.0.id
   role_definition_name = var.default_contributor_role
   principal_id         = module.kubernetes.node_pool_identity_principal_id
-  depends_on           = [ module.kubernetes, azurerm_container_registry.acr ]
+  depends_on           = [module.kubernetes, azurerm_container_registry.acr]
 }
 
 resource "azurerm_dns_zone" "dns_zone" {
@@ -92,27 +92,27 @@ resource "azurerm_role_assignment" "dns_contributor" {
 }
 
 module "k8s" {
-  source                   = "./modules/k8s"
-  host                     = module.kubernetes.host
-  client_certificate       = module.kubernetes.client_certificate
-  client_key               = module.kubernetes.client_key
-  cluster_ca_certificate   = module.kubernetes.cluster_ca_certificate
-  cluster_name             = module.kubernetes.cluster_name
-  resource_group_name      = azurerm_resource_group.this.name
-  environment              = local.environment
-  k8s_depends_on           = [module.kubernetes.host]
-  k8s_combined_vars        = merge(var.k8s_combined_vars, {
-      public_ip_resource_group    = var.ip_address_resource_group
-      public_ip_name              = var.public_ip_address_name
-      public_ip_dns               = var.dns_label
-      dns_zone                    = var.dns_zone
-      subscription_id             = data.azurerm_subscription.current.subscription_id
-      identity_client_id          = module.kubernetes.node_pool_identity_client_id
-      backend_storge_account_name = var.backend_storge_account_name
-      backend_container_name      = var.backend_container_name
-      backend_blob_name           = var.backend_blob_name
-      backend_secret_name         = var.backend_secret_name
-      backend_secret_namespace    = var.backend_secret_namespace
+  source                 = "./modules/k8s"
+  host                   = module.kubernetes.host
+  client_certificate     = module.kubernetes.client_certificate
+  client_key             = module.kubernetes.client_key
+  cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
+  cluster_name           = module.kubernetes.cluster_name
+  resource_group_name    = azurerm_resource_group.this.name
+  environment            = local.environment
+  k8s_depends_on         = [module.kubernetes.host]
+  k8s_combined_vars = merge(var.k8s_combined_vars, {
+    public_ip_resource_group    = var.ip_address_resource_group
+    public_ip_name              = var.public_ip_address_name
+    public_ip_dns               = var.dns_label
+    dns_zone                    = var.dns_zone
+    subscription_id             = data.azurerm_subscription.current.subscription_id
+    identity_client_id          = module.kubernetes.node_pool_identity_client_id
+    backend_storge_account_name = var.backend_storge_account_name
+    backend_container_name      = var.backend_container_name
+    backend_blob_name           = var.backend_blob_name
+    backend_secret_name         = var.backend_secret_name
+    backend_secret_namespace    = var.backend_secret_namespace
   })
 }
 
