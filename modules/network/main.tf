@@ -16,32 +16,32 @@ resource "azurerm_subnet" "subnet1" {
   virtual_network_name = azurerm_virtual_network.this.name
 }
 
-resource "azurerm_network_security_group" "nsg" {
-  name                = "${var.project_name}-${var.combined_vars["nsg_abbrevation"]}-${var.combined_vars["nsg_profile"]}-${var.environment}-${var.location}-${var.instance_count}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
+# resource "azurerm_network_security_group" "nsg" {
+#   name                = "${var.project_name}-${var.combined_vars["nsg_abbrevation"]}-${var.combined_vars["nsg_profile"]}-${var.environment}-${var.location}-${var.instance_count}"
+#   location            = var.location
+#   resource_group_name = var.resource_group_name
 
-  # security_rule {
-  #   name                       = "test123"
-  #   priority                   = 100
-  #   direction                  = "Inbound"
-  #   access                     = "Allow"
-  #   protocol                   = "Tcp"
-  #   source_port_range          = "*"
-  #   destination_port_range     = "*"
-  #   source_address_prefix      = "*"
-  #   destination_address_prefix = "*"
-  # }
+# security_rule {
+#   name                       = "test123"
+#   priority                   = 100
+#   direction                  = "Inbound"
+#   access                     = "Allow"
+#   protocol                   = "Tcp"
+#   source_port_range          = "*"
+#   destination_port_range     = "*"
+#   source_address_prefix      = "*"
+#   destination_address_prefix = "*"
+# }
 
-  # tags = {
-  #   environment = "Production"
-  # }
-}
+# tags = {
+#   environment = "Production"
+# }
+# }
 
-resource "azurerm_subnet_network_security_group_association" "assoc" {
-  subnet_id                 = azurerm_subnet.subnet1.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
+# resource "azurerm_subnet_network_security_group_association" "assoc" {
+#   subnet_id                 = azurerm_subnet.subnet1.id
+#   network_security_group_id = azurerm_network_security_group.nsg.id
+# }
 
 # resource "azurerm_subnet" "subnet2" {
 #   name                 = "${var.project_name}-${local.subnet_abbrevation}-${local.subnet2}-${var.environment}-${var.location}-${var.instance_count}"
