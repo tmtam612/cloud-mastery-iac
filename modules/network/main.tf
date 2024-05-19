@@ -17,9 +17,9 @@ resource "azurerm_subnet" "subnet1" {
 }
 
 resource "azurerm_network_security_group" "nsg" {
-  name                = "acceptanceTestSecurityGroup1"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  name                = "${var.project_name}-${var.combined_vars["nsg_abbrevation"]}-${var.combined_vars["nsg_profile"]}-${var.environment}-${var.location}-${var.instance_count}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
   # security_rule {
   #   name                       = "test123"
