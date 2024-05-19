@@ -67,16 +67,6 @@ jobs:
       run: sudo apt install -y jq
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Run Trivy vulnerability scanner in IaC mode
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'config'
-        hide-progress: false
-        format: 'sarif'
-        exit-code: '1'
-        ignore-unfixed: true
-        severity: 'CRITICAL,HIGH'
-
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v2
       with:
@@ -107,6 +97,11 @@ jobs:
 
     - name: Create tfplan.json file
       run: terraform show -json tfplan.binary | jq > tfplan.json
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Run Trivy vulnerability scanner in IaC mode
+      uses: aquasecurity/trivy-action@master
+      run: trivy conf tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Scanning
