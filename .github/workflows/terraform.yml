@@ -63,13 +63,8 @@ jobs:
       run: pip3 install checkov
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Install checkov
-      run: |
-        sudo apt-get install wget apt-transport-https gnupg
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install trivy
+    - name: Install Brew
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Install jq
