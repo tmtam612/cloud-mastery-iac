@@ -10,6 +10,7 @@ env:
   ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
   AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
   ROOT_PATH: '${{github.workspace}}'
+  GITHUB_TOKEN: '${{secrets.PAT}}'
   DEVELOP_WORKPLACE: 'develop'
   ACCEPTANCE_WORKPLACE: 'acceptance'
   PRODUCTION_WORKPLACE: 'production'
@@ -94,7 +95,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
+      run: terraform plan -var="github_token=${{env.GITHUB_TOKEN}}" --var-file=${{env.ENVIRONMENT_DEV_TFVARS}} --out tfplan.binary
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Create tfplan.json file
@@ -148,7 +149,7 @@ jobs:
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
+      run: terraform apply -auto-approve -var="github_token=${{env.GITHUB_TOKEN}}" --var-file=${{env.ENVIRONMENT_DEV_TFVARS}}
       if: ${{inputs.tf_destroy}} == false
       working-directory: ${{ env.ROOT_PATH }}
 
