@@ -68,7 +68,7 @@ jobs:
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Add brew to Env
-      run: (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/runner/.bashrc | eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+      run: (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/runner/.bashrc && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         
       working-directory: ${{env.ROOT_PATH}}
 
