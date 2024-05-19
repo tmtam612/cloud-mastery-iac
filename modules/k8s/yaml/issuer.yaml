@@ -10,13 +10,14 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
-    - http01:
-        ingress:
-          class: nginx
-          podTemplate:
-            spec:
-              nodeSelector:
-                "kubernetes.io/os": linux
+    - dns01:
+        azureDNS:
+          hostedZoneName: $dns_zone_name
+          resourceGroupName: $resource_group
+          subscriptionID: $subscription_id
+          environment: AzurePublicCloud
+          managedIdentity:
+            clientID: $client_id
 ---
 # apiVersion: cert-manager.io/v1
 # kind: ClusterIssuer

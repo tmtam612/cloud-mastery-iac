@@ -35,9 +35,10 @@ resource "azurerm_container_registry" "acr" {
 
 resource "azurerm_role_assignment" "acr" {
   count                = var.acr_combined_vars.create_acr
-  scope                = azurerm_container_registry.acr.id
+  scope                = azurerm_container_registry.acr.0.id
   role_definition_name = var.default_contributor_role
   principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+  depends_on = [ azurerm_container_registry.acr ]
 }
 
 #config virtual network
@@ -71,10 +72,11 @@ module "kubernetes" {
 }
 
 resource "azurerm_role_assignment" "acr_agentpool" {
-  scope                = azurerm_container_registry.acr.id
+  count                = var.acr_combined_vars.create_acr
+  scope                = azurerm_container_registry.acr.0.id
   role_definition_name = var.default_contributor_role
   principal_id         = module.kubernetes.node_pool_identity_principal_id
-  depends_on           = [ module.kubernetes ]
+  depends_on           = [ module.kubernetes, azurerm_container_registry.acr ]
 }
 
 resource "azurerm_dns_zone" "dns_zone" {
@@ -104,6 +106,7 @@ module "k8s" {
       public_ip_name              = var.public_ip_address_name
       public_ip_dns               = var.dns_label
       dns_zone                    = var.dns_zone
+      subscription_id             = data.azurerm_subscription.current.subscription_id
       identity_client_id          = module.kubernetes.node_pool_identity_client_id
       backend_storge_account_name = var.backend_storge_account_name
       backend_container_name      = var.backend_container_name

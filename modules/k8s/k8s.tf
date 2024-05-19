@@ -31,28 +31,12 @@ resource "helm_release" "cert_manager" {
   depends_on = [null_resource.local_exec]
 }
 
-#Add a Federated Identity
-resource "null_resource" "create_cluster_issuer" {
-  provisioner "local-exec" {
-    command = <<-EOT
-      export dns_zone_name=${var.k8s_combined_vars["dns_zone"]}
-      export resource_group=${var.resource_group_name}
-      export clientID=${var.k8s_combined_vars["identity_client_id"]}
-      envsubst < ${path.module}/yaml/issuer.yaml | kubectl apply -n argocd -f -
-      EOT
-  }
-
-  depends_on = [
-    helm_release.cert_manager
-  ]
-}
-
-## Create App Configuration using an external script
+## Create issuer and cert
 resource "null_resource" "create_cert" {
   provisioner "local-exec" {
     command     = <<-EOT
-      chmod +x ${path.module}/cert.sh
-      ${path.module}/cert.sh ${path.module} ${var.k8s_combined_vars["backend_storge_account_name"]} ${var.k8s_combined_vars["backend_container_name"]} ${var.k8s_combined_vars["backend_blob_name"]}
+      chmod +x ${path.module}/sh/cert.sh
+      ${path.module}/sh/cert.sh ${path.module} ${var.k8s_combined_vars["backend_storge_account_name"]} ${var.k8s_combined_vars["backend_container_name"]} ${var.k8s_combined_vars["backend_blob_name"]} ${var.k8s_combined_vars["dns_zone"]} ${var.resource_group_name} ${var.k8s_combined_vars["subscription_id"]} ${var.k8s_combined_vars["identity_client_id"]}
     EOT
     interpreter = ["bash", "-c"]
   }
