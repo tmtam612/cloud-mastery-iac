@@ -67,9 +67,12 @@ jobs:
       run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Add brew to Env
-      run: ((echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/runner/.bashrc) && (eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)")
-        
+    - name: Add brew to Env 1
+      run: (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/runner/.bashrc
+      working-directory: ${{env.ROOT_PATH}}
+
+    - name: Add brew to Env 2
+      run: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Install Trivy
