@@ -14,6 +14,10 @@ variable "instance_count" {
   type = string
 }
 
+variable "github_token" {
+  type = string
+}
+
 variable "dns_zone" {
   type = string
 }

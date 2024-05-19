@@ -24,7 +24,7 @@ permissions:
 jobs:
   terraform_plan_dev:
     name: 'Terraform Plan dev'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
     # Use the Bash shell regardless whether the GitHub Actions runner is self-hosted, macos-latest, or windows-latest
     defaults:
@@ -112,7 +112,7 @@ jobs:
   terraform_apply_dev:
     name: 'Terraform Apply dev'
     needs: [terraform_plan_dev]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: develop
     
     defaults:

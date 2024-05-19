@@ -113,6 +113,7 @@ module "k8s" {
     backend_blob_name           = var.backend_blob_name
     backend_secret_name         = var.backend_secret_name
     backend_secret_namespace    = var.backend_secret_namespace
+    github_token                = var.github_token
   })
 }
 

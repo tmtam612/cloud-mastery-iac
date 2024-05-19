@@ -91,25 +91,35 @@ resource "helm_release" "argocd" {
   depends_on       = [null_resource.local_exec, helm_release.ingress_nginx]
 }
 
-# resource "helm_release" "actions_runner_controller" {
-#   name             = var.k8s_combined_vars["actions_runner_controller_name"]
-#   repository       = var.k8s_combined_vars["actions_runner_controller_repository"]
-#   chart            = var.k8s_combined_vars["actions_runner_controller_chart"]
-#   namespace        = var.k8s_combined_vars["actions_runner_controller_namespace"]
-#   create_namespace = var.k8s_combined_vars["actions_runner_controller_create_namespace"]
-#   wait             = var.k8s_combined_vars["actions_runner_controller_wait"]
+resource "helm_release" "actions_runner_controller" {
+  name             = var.k8s_combined_vars["actions_runner_controller_name"]
+  repository       = var.k8s_combined_vars["actions_runner_controller_repository"]
+  chart            = var.k8s_combined_vars["actions_runner_controller_chart"]
+  namespace        = var.k8s_combined_vars["actions_runner_controller_namespace"]
+  create_namespace = var.k8s_combined_vars["actions_runner_controller_create_namespace"]
+  wait             = var.k8s_combined_vars["actions_runner_controller_wait"]
 
-#   set {
-#     name  = var.k8s_combined_vars["actions_runner_controller_set_name"]
-#     value = var.k8s_combined_vars["actions_runner_controller_set_value"]
-#   }
+  set {
+    name  = var.k8s_combined_vars["actions_runner_controller_set_name"]
+    value = var.k8s_combined_vars["actions_runner_controller_set_value"]
+  }
 
-#   set {
-#     name  = var.k8s_combined_vars["actions_runner_controller_set_github_name"]
-#     value = var.k8s_combined_vars["actions_runner_controller_set_github_value"]
-#   }
-#   depends_on = [helm_release.cert_manager]
-# }
+  set {
+    name  = var.k8s_combined_vars["actions_runner_controller_set_github_name"]
+    value = var.k8s_combined_vars["github_token"]
+  }
+  depends_on = [helm_release.cert_manager]
+}
+
+# self-hosted runner
+resource "null_resource" "self_hosted_runners" {
+  count = var.k8s_combined_vars["actions_runner_controller_installed_flag"] 
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
+  }
+
+  depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
+}
 
 # resource "null_resource" "export_git_url" {
 #   provisioner "local-exec" {
@@ -125,16 +135,6 @@ resource "helm_release" "argocd" {
 #   depends_on = [null_resource.export_git_url]
 # }
 
-
-# # self-hosted runner
-# resource "null_resource" "self_hosted_runners" {
-#   count = var.k8s_combined_vars["actions_runner_controller_installed_flag"] 
-#   provisioner "local-exec" {
-#     command = "kubectl apply -f ${path.module}/yaml/self-hosted-runner.yaml"
-#   }
-
-#   depends_on = [helm_release.actions_runner_controller, null_resource.local_exec]
-# }
 # # ArgoCD Bootstrap the app of apps 
 # resource "null_resource" "argocd_bootstrap" {
 #   provisioner "local-exec" {
