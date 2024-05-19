@@ -69,10 +69,12 @@ jobs:
 
     - name: Add brew to Env 1
       run: (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/runner/.bashrc
-      working-directory: ${{env.ROOT_PATH}}
 
     - name: Add brew to Env 2
       run: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+    - name: Install Trivy
+      run: brew --version
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Install Trivy
