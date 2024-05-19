@@ -63,22 +63,8 @@ jobs:
       run: pip3 install checkov
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Install Brew
-      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      working-directory: ${{env.ROOT_PATH}}
-
-    - name: Add brew to Env 1
-      run: (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/runner/.bashrc
-
-    - name: Add brew to Env 2
-      run: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
     - name: Install Trivy
-      run: brew --version
-      working-directory: ${{env.ROOT_PATH}}
-
-    - name: Install Trivy
-      run: brew install trivy
+      run: sudo apt-get install trivy
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Install jq
