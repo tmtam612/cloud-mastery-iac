@@ -6,14 +6,19 @@ metadata:
 spec:
   # name of the tls secret to store
   # the generated certificate/key pair
-  secretName: topx-team-certificate-secret
+  secretName: tls-secret
   isCA: true
   issuerRef:
     # issuer created in step 1
-    name: letsencrypt-staging
+    name: letsencrypt-production
     kind: ClusterIssuer
     group: cert-manager.io
   dnsNames:
   # one or more fully-qualified domain name
   # can be defined here
-  - "*.topx.team"
+  - $DNS_NAME
+  - '$DNS_NAME_WILDCARD'
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true" # Auto create reflection for matching namespaces
