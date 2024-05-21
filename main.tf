@@ -79,16 +79,22 @@ resource "azurerm_role_assignment" "acr_agentpool" {
   depends_on           = [module.kubernetes, azurerm_container_registry.acr]
 }
 
-resource "azurerm_dns_zone" "dns_zone" {
-  name                = var.dns_zone
+#config dns_zone
+module "dns_zone" {
+  source              = "./modules/dns_zone"
+  location            = local.location
   resource_group_name = azurerm_resource_group.this.name
-}
-
-resource "azurerm_role_assignment" "dns_contributor" {
-  scope                            = azurerm_dns_zone.dns_zone.id
-  role_definition_name             = var.dns_contributor_role
-  principal_id                     = module.kubernetes.kube_object_id
-  skip_service_principal_aad_check = true # Allows skipping propagation of identity to ensure assignment succeeds.
+  project_name        = local.project_name
+  environment         = local.environment
+  instance_count      = local.instance_count
+  dns_zone            = var.dns_zone
+  combined_vars = {
+    ip_address_id        = data.azurerm_public_ip.ip_address.id
+    record_profile       = "core"
+    dns_contributor_role = var.dns_contributor_role
+    kube_object_id       = module.kubernetes.kube_object_id
+  }
+  depends_on = [module.kubernetes.kube_object_id]
 }
 
 module "k8s" {
