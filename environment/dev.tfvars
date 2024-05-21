@@ -160,6 +160,11 @@ aks_combined_vars = {
 
 #k8s
 k8s_combined_vars = {
+  dns_name                                   = "cloudmastery.info"
+  dns_name_wildcard                          = "*.cloudmastery.info"
+  acme_staging_server_url                    = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  acme_server_url                            = "https://acme-v02.api.letsencrypt.org/directory"
+  email                                      = "tmtam612@gmail.com"
   defautl_namespace                          = "default"
   cert_manager_name                          = "cert-manager"
   cert_manager_repository                    = "https://charts.jetstack.io"

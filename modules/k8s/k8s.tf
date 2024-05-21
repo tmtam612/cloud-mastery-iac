@@ -36,7 +36,20 @@ resource "null_resource" "create_cert" {
   provisioner "local-exec" {
     command     = <<-EOT
       chmod +x ${path.module}/sh/cert.sh
-      ${path.module}/sh/cert.sh ${path.module} ${var.k8s_combined_vars["backend_storge_account_name"]} ${var.k8s_combined_vars["backend_container_name"]} ${var.k8s_combined_vars["backend_blob_name"]} ${var.k8s_combined_vars["dns_zone"]} ${var.resource_group_name} ${var.k8s_combined_vars["subscription_id"]} ${var.k8s_combined_vars["identity_client_id"]}
+      ${path.module}/sh/cert.sh \
+      ${path.module} \
+      ${var.k8s_combined_vars["backend_storge_account_name"]} \
+      ${var.k8s_combined_vars["backend_container_name"]} \
+      ${var.k8s_combined_vars["backend_blob_name"]} \
+      ${var.k8s_combined_vars["dns_zone"]} \
+      ${var.resource_group_name} \
+      ${var.k8s_combined_vars["subscription_id"]} \
+      ${var.k8s_combined_vars["identity_client_id"]} \
+      ${var.k8s_combined_vars["acme_staging_server_url"]} \
+      ${var.k8s_combined_vars["acme_server_url"]} \
+      ${var.k8s_combined_vars["email"]} \
+      ${var.k8s_combined_vars["dns_name"]} \
+      ${var.k8s_combined_vars["dns_name_wildcard"]}
     EOT
     interpreter = ["bash", "-c"]
   }

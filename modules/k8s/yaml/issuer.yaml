@@ -2,38 +2,38 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-staging
-  namespace: ingress-controller
 spec:
   acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: tmtam612@gmail.com
+    server: $ACME_STAGING_SERVER_URL
+    email: $EMAIL
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
     - dns01:
         azureDNS:
-          hostedZoneName: $dns_zone_name
-          resourceGroupName: $resource_group
-          subscriptionID: $subscription_id
+          hostedZoneName: $AZURE_ZONE_NAME
+          resourceGroupName: $AZURE_RESOURCE_GROUP
+          subscriptionID: $AZURE_SUBSCRIPTION_ID
           environment: AzurePublicCloud
           managedIdentity:
-            clientID: $client_id
+            clientID: $IDENTITY_CLIENT_ID
 ---
-# apiVersion: cert-manager.io/v1
-# kind: ClusterIssuer
-# metadata:
-#   name: letsencrypt-production
-# spec:
-#   acme:
-#     server: https://acme-v02.api.letsencrypt.org/directory
-#     email: tmtam612@gmail.com
-#     privateKeySecretRef:
-#       name: letsencrypt-production
-#     solvers:
-#     - http01:
-#         ingress:
-#           class: nginx
-#           podTemplate:
-#             spec:
-#               nodeSelector:
-#                 "kubernetes.io/os": linux
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: $ACME_SERVER_URL
+    email: $EMAIL
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+    - dns01:
+        azureDNS:
+          hostedZoneName: $AZURE_ZONE_NAME
+          resourceGroupName: $AZURE_RESOURCE_GROUP
+          subscriptionID: $AZURE_SUBSCRIPTION_ID
+          environment: AzurePublicCloud
+          managedIdentity:
+            clientID: $IDENTITY_CLIENT_ID
