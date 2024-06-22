@@ -5,7 +5,7 @@ resource "azurerm_dns_zone" "dns_zone" {
 }
 
 resource "azurerm_dns_a_record" "default_A_record" {
-  name                = "${var.project_name}-recordA-${var.combined_vars.record_profile}-${var.environment}-${var.location}-${var.instance_count}"
+  name                = "*"
   zone_name           = azurerm_dns_zone.dns_zone.name
   resource_group_name = var.resource_group_name
   ttl                 = 300

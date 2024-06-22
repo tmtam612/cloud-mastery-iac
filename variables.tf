@@ -15,7 +15,8 @@ variable "instance_count" {
 }
 
 variable "github_token" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "dns_zone" {
