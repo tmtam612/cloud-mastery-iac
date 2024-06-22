@@ -1,9 +1,9 @@
 
 locals {
-  project_name   = var.project_name
-  environment    = var.environment
-  location       = var.region
-  instance_count = var.instance_count
+  project_name        = var.project_name
+  environment         = var.environment
+  location            = var.region
+  instance_count      = var.instance_count
   resource_group_name = var.resource_group_name != "" ? var.resource_group_name : "${local.project_name}-${var.resource_group_abbrevation}-${var.resource_group_profile}-${local.environment}-${local.location}-${local.instance_count}"
 }
 
