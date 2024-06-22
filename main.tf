@@ -4,11 +4,13 @@ locals {
   environment    = var.environment
   location       = var.region
   instance_count = var.instance_count
+  resource_group_name = var.resource_group_name != "" ? var.resource_group_name : "${local.project_name}-${var.resource_group_abbrevation}-${var.resource_group_profile}-${local.environment}-${local.location}-${local.instance_count}"
 }
 
 #config azure resource group
 resource "azurerm_resource_group" "this" {
-  name     = "${local.project_name}-${var.resource_group_abbrevation}-${var.resource_group_profile}-${local.environment}-${local.location}-${local.instance_count}"
+  count    = var.resource_group_name != "" ? 0 : 1
+  name     = local.resource_group_name
   location = local.location
 }
 
@@ -16,7 +18,7 @@ resource "azurerm_resource_group" "this" {
 resource "azurerm_user_assigned_identity" "user_assigned_identity" {
   name                = "${var.project_name}-${var.user_assigned_identity_abbrevation}-${var.user_assigned_identity_profile}-${var.environment}-${local.location}-${var.instance_count}"
   location            = local.location
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = var.resource_group_name
 }
 
 resource "azurerm_role_assignment" "base" {
@@ -28,7 +30,7 @@ resource "azurerm_role_assignment" "base" {
 resource "azurerm_container_registry" "acr" {
   count               = var.acr_combined_vars.create_acr
   name                = "${var.acr_combined_vars.project_name_without_dash}${var.acr_combined_vars.acr_abbrevation}${var.acr_combined_vars.acr_profile}${var.environment}${local.location}${var.instance_count}"
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = var.resource_group_name
   location            = local.location
   sku                 = var.acr_combined_vars.sku
 }
@@ -48,7 +50,7 @@ module "network" {
   environment           = local.environment
   location              = local.location
   instance_count        = local.instance_count
-  resource_group_name   = azurerm_resource_group.this.name
+  resource_group_name   = var.resource_group_name
   combined_vars         = var.vnet_combined_vars
   list_subnet           = var.list_subnet
   main_address_space    = var.main_address_space
@@ -60,7 +62,7 @@ module "network" {
 module "kubernetes" {
   source                 = "./modules/kubernetes"
   location               = local.location
-  resource_group_name    = azurerm_resource_group.this.name
+  resource_group_name    = var.resource_group_name
   project_name           = local.project_name
   environment            = local.environment
   instance_count         = local.instance_count
@@ -83,7 +85,7 @@ resource "azurerm_role_assignment" "acr_agentpool" {
 module "dns_zone" {
   source              = "./modules/dns_zone"
   location            = local.location
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = var.resource_group_name
   project_name        = local.project_name
   environment         = local.environment
   instance_count      = local.instance_count
@@ -104,7 +106,7 @@ module "k8s" {
   client_key             = module.kubernetes.client_key
   cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
   cluster_name           = module.kubernetes.cluster_name
-  resource_group_name    = azurerm_resource_group.this.name
+  resource_group_name    = var.resource_group_name
   environment            = local.environment
   k8s_depends_on         = [module.kubernetes.host]
   k8s_combined_vars = merge(var.k8s_combined_vars, {

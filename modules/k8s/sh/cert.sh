@@ -18,7 +18,7 @@ fi
 # Set values for dnsNames
 export DNS_NAME=$12
 export DNS_NAME_WILDCARD=$13
-kubectl apply -f $PWD/$path_module/yaml/certificate.yaml --validate=false
+envsubst < $PWD/$path_module/yaml/certificate.yaml | kubectl apply --validate=false -f -
 if [[ $(echo "$blob_exist" | jq -r '.exists') == "true" ]]; then
     az storage blob download --account-name $storage_account_name --container-name $container_name  --name $blob_name --file secret.yaml
     if ! kubectl get namespace ingress-service; then

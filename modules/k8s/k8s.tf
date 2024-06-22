@@ -111,6 +111,7 @@ resource "helm_release" "actions_runner_controller" {
   namespace        = var.k8s_combined_vars["actions_runner_controller_namespace"]
   create_namespace = var.k8s_combined_vars["actions_runner_controller_create_namespace"]
   wait             = var.k8s_combined_vars["actions_runner_controller_wait"]
+  count            = var.k8s_combined_vars["actions_runner_controller_installed_flag"]
 
   set {
     name  = var.k8s_combined_vars["actions_runner_controller_set_name"]

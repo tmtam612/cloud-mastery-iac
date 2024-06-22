@@ -26,6 +26,10 @@ variable "dns_label" {
   type = string
 }
 
+variable "resource_group_name" {
+  type = string
+}
+
 variable "public_ip_address_name" {
   type = string
 }

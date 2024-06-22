@@ -1,13 +1,14 @@
 #local
-project_name           = "txt"
+project_name           = "topx"
 environment            = "dev"
 region                 = "eastus"
 instance_count         = "1"
-dns_zone               = "cloudmastery.info"
-dns_label              = "cloudmatery"
-public_ip_address_name = "cloudmastery"
+dns_zone               = "topx"
+dns_label              = "topx"
+public_ip_address_name = "topx"
 dns_contributor_role   = "DNS Zone Contributor"
 #resource group
+resource_group_name         = "topx-techstack-rg"
 resource_group_abbrevation  = "rg"
 resource_group_profile      = "core"
 ip_address_resource_group   = "topx-rg-backend-nonprod-eastus"
@@ -139,10 +140,10 @@ aks_combined_vars = {
   kubernetes_instance_count      = 3
   vm_size                        = "standard_b2s"
   node_count                     = 1
-  aks_dns_prefix                 = "cloudmastery.info"
+  aks_dns_prefix                 = "topx"
   aks_identity_type              = "UserAssigned"
   default_node_name              = "defaultnode"
-  node_pool_name                 = "topxnodepool"
+  node_pool_name                 = "nodepool"
   node_priority                  = "Spot"
   sku_tier                       = "Free" //change to standard when on production
   oidc_issuer_enabled            = true   //enable openID connect
@@ -160,8 +161,8 @@ aks_combined_vars = {
 
 #k8s
 k8s_combined_vars = {
-  dns_name                                   = "cloudmastery.info"
-  dns_name_wildcard                          = "*.cloudmastery.info"
+  dns_name                                   = "topx.team"
+  dns_name_wildcard                          = "*.topx.team"
   acme_staging_server_url                    = "https://acme-staging-v02.api.letsencrypt.org/directory"
   acme_server_url                            = "https://acme-v02.api.letsencrypt.org/directory"
   email                                      = "tmtam612@gmail.com"
@@ -183,7 +184,7 @@ k8s_combined_vars = {
   actions_runner_controller_set_value        = true
   actions_runner_controller_set_github_name  = "authSecret.github_token"
   actions_runner_controller_set_github_value = "<your-PAT>"
-  actions_runner_controller_installed_flag   = 1
+  actions_runner_controller_installed_flag   = 0
   argocd_name                                = "argocd"
   argocd_repository                          = "https://argoproj.github.io/argo-helm"
   argocd_chart                               = "argo-cd"

@@ -18,7 +18,7 @@ resource "azurerm_kubernetes_cluster" "cluster" {
   workload_identity_enabled = var.combined_vars["workload_identity_enabled"] //enable workload identity
   automatic_channel_upgrade = var.combined_vars["automatic_channel_upgrade"]
   private_cluster_enabled   = var.combined_vars["private_cluster_enabled"]
-  node_resource_group       = "${var.project_name}-${var.environment}-default-${var.instance_count}"
+  node_resource_group       = "${var.project_name}-${var.environment}-${var.combined_vars["node_pool_name"]}-${var.instance_count}"
 
   tags = {
     env = var.environment
@@ -39,26 +39,26 @@ resource "azurerm_kubernetes_cluster" "cluster" {
     identity_ids = [var.user_assigned_identity]
   }
 
-  azure_policy_enabled = true
+  # azure_policy_enabled = true
   depends_on           = [var.subnet_id]
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "spot" {
-  name                  = "${var.project_name}-${var.environment}-${var.combined_vars["node_pool_name"]}-${var.instance_count}"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.cluster.id
-  vm_size               = var.combined_vars["vm_size"]
-  vnet_subnet_id        = var.subnet_id
-  priority              = "Spot"
-  spot_max_price        = -1
+# resource "azurerm_kubernetes_cluster_node_pool" "spot" {
+#   name                  = "${var.project_name}${var.combined_vars["node_pool_name"]}${var.instance_count}"
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.cluster.id
+#   vm_size               = var.combined_vars["vm_size"]
+#   vnet_subnet_id        = var.subnet_id
+#   priority              = "Spot"
+#   spot_max_price        = -1
 
-  enable_auto_scaling = var.combined_vars["enable_auto_scaling"]
-  node_count          = var.combined_vars["node_count"]
-  min_count           = var.combined_vars["min_count"]
-  max_count           = var.combined_vars["max_count"]
+#   enable_auto_scaling = var.combined_vars["enable_auto_scaling"]
+#   node_count          = var.combined_vars["node_count"]
+#   min_count           = var.combined_vars["min_count"]
+#   max_count           = var.combined_vars["max_count"]
 
-  lifecycle {
-    ignore_changes = [node_count]
-  }
+#   lifecycle {
+#     ignore_changes = [node_count]
+#   }
 
-  depends_on = [azurerm_kubernetes_cluster.cluster.id]
-}
+#   depends_on = [azurerm_kubernetes_cluster.cluster]
+# }

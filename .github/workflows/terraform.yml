@@ -107,7 +107,7 @@ jobs:
       working-directory: ${{env.ROOT_PATH}}
 
     - name: Scanning with checkov
-      run: checkov -f tfplan.json --skip-check CKV_AZURE_227,CKV_AZURE_4,CKV_AZURE_6,CKV_AZURE_232,CKV_AZURE_226,CKV_AZURE_172,CKV_AZURE_141,CKV_AZURE_168,CKV_AZURE_117,CKV_AZURE_7,CKV_AZURE_170,CKV_AZURE_115,CKV2_AZURE_31
+      run: checkov -f tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_dev:
