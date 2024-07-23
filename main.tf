@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "this" {
 resource "azurerm_user_assigned_identity" "user_assigned_identity" {
   name                = "${var.project_name}-${var.user_assigned_identity_abbrevation}-${var.user_assigned_identity_profile}-${var.environment}-${local.location}-${var.instance_count}"
   location            = local.location
-  resource_group_name = var.resource_group_name
+  resource_group_name = local.resource_group_name
 }
 
 resource "azurerm_role_assignment" "base" {
@@ -30,7 +30,7 @@ resource "azurerm_role_assignment" "base" {
 resource "azurerm_container_registry" "acr" {
   count               = var.acr_combined_vars.create_acr
   name                = "${var.acr_combined_vars.project_name_without_dash}${var.acr_combined_vars.acr_abbrevation}${var.acr_combined_vars.acr_profile}${var.environment}${local.location}${var.instance_count}"
-  resource_group_name = var.resource_group_name
+  resource_group_name = local.resource_group_name
   location            = local.location
   sku                 = var.acr_combined_vars.sku
 }
@@ -50,7 +50,7 @@ module "network" {
   environment           = local.environment
   location              = local.location
   instance_count        = local.instance_count
-  resource_group_name   = var.resource_group_name
+  resource_group_name   = local.resource_group_name
   combined_vars         = var.vnet_combined_vars
   list_subnet           = var.list_subnet
   main_address_space    = var.main_address_space
@@ -62,7 +62,7 @@ module "network" {
 module "kubernetes" {
   source                 = "./modules/kubernetes"
   location               = local.location
-  resource_group_name    = var.resource_group_name
+  resource_group_name    = local.resource_group_name
   project_name           = local.project_name
   environment            = local.environment
   instance_count         = local.instance_count
@@ -85,7 +85,7 @@ resource "azurerm_role_assignment" "acr_agentpool" {
 module "dns_zone" {
   source              = "./modules/dns_zone"
   location            = local.location
-  resource_group_name = var.resource_group_name
+  resource_group_name = local.resource_group_name
   project_name        = local.project_name
   environment         = local.environment
   instance_count      = local.instance_count
@@ -98,29 +98,29 @@ module "dns_zone" {
   depends_on = [module.kubernetes.kube_object_id]
 }
 
-# module "k8s" {
-#   source                 = "./modules/k8s"
-#   host                   = module.kubernetes.host
-#   client_certificate     = module.kubernetes.client_certificate
-#   client_key             = module.kubernetes.client_key
-#   cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
-#   cluster_name           = module.kubernetes.cluster_name
-#   resource_group_name    = var.resource_group_name
-#   environment            = local.environment
-#   k8s_depends_on         = [module.kubernetes.host]
-#   k8s_combined_vars = merge(var.k8s_combined_vars, {
-#     public_ip_resource_group    = var.ip_address_resource_group
-#     public_ip_name              = var.public_ip_address_name
-#     public_ip_dns               = var.dns_label
-#     dns_zone                    = var.dns_zone
-#     subscription_id             = data.azurerm_subscription.current.subscription_id
-#     identity_client_id          = module.kubernetes.node_pool_identity_client_id
-#     backend_storge_account_name = var.backend_storge_account_name
-#     backend_container_name      = var.backend_container_name
-#     backend_blob_name           = var.backend_blob_name
-#     backend_secret_name         = var.backend_secret_name
-#     backend_secret_namespace    = var.backend_secret_namespace
-#     github_token                = var.github_token
-#   })
-# }
+module "k8s" {
+  source                 = "./modules/k8s"
+  host                   = module.kubernetes.host
+  client_certificate     = module.kubernetes.client_certificate
+  client_key             = module.kubernetes.client_key
+  cluster_ca_certificate = module.kubernetes.cluster_ca_certificate
+  cluster_name           = module.kubernetes.cluster_name
+  resource_group_name    = local.resource_group_name
+  environment            = local.environment
+  k8s_depends_on         = [module.kubernetes.host]
+  k8s_combined_vars = merge(var.k8s_combined_vars, {
+    public_ip_resource_group    = var.ip_address_resource_group
+    public_ip_name              = var.public_ip_address_name
+    public_ip_dns               = var.dns_label
+    dns_zone                    = var.dns_zone
+    subscription_id             = data.azurerm_subscription.current.subscription_id
+    identity_client_id          = module.kubernetes.node_pool_identity_client_id
+    backend_storge_account_name = var.backend_storge_account_name
+    backend_container_name      = var.backend_container_name
+    backend_blob_name           = var.backend_blob_name
+    backend_secret_name         = var.backend_secret_name
+    backend_secret_namespace    = var.backend_secret_namespace
+    github_token                = var.github_token
+  })
+}
 
