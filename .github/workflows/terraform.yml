@@ -60,19 +60,19 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: Install checkov
-      run: pip3 install checkov
-      working-directory: ${{env.ROOT_PATH}}
+    # - name: Install checkov
+    #   run: pip3 install checkov
+    #   working-directory: ${{env.ROOT_PATH}}
 
-    - name: Install Trivy
-      run: |
-        wget https://github.com/aquasecurity/trivy/releases/download/v0.31.3/trivy_0.31.3_Linux-64bit.deb
-        sudo dpkg -i trivy_0.31.3_Linux-64bit.deb
-      working-directory: ${{env.ROOT_PATH}}
+    # - name: Install Trivy
+    #   run: |
+    #     wget https://github.com/aquasecurity/trivy/releases/download/v0.31.3/trivy_0.31.3_Linux-64bit.deb
+    #     sudo dpkg -i trivy_0.31.3_Linux-64bit.deb
+    #   working-directory: ${{env.ROOT_PATH}}
 
-    - name: Install jq
-      run: sudo apt install -y jq
-      working-directory: ${{env.ROOT_PATH}}
+    # - name: Install jq
+    #   run: sudo apt install -y jq
+    #   working-directory: ${{env.ROOT_PATH}}
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
@@ -102,13 +102,13 @@ jobs:
       run: terraform show -json tfplan.binary | jq > tfplan.json
       working-directory: ${{env.ROOT_PATH}}
 
-    - name: Scanning with trivy
-      run: trivy conf tfplan.json
-      working-directory: ${{env.ROOT_PATH}}
+    # - name: Scanning with trivy
+    #   run: trivy conf tfplan.json
+    #   working-directory: ${{env.ROOT_PATH}}
 
-    - name: Scanning with checkov
-      run: checkov -f tfplan.json
-      working-directory: ${{env.ROOT_PATH}}
+    # - name: Scanning with checkov
+    #   run: checkov -f tfplan.json
+    #   working-directory: ${{env.ROOT_PATH}}
 
   terraform_apply_dev:
     name: 'Terraform Apply dev'

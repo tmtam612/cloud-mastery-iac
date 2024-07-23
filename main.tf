@@ -70,7 +70,7 @@ module "kubernetes" {
   user_assigned_identity = azurerm_user_assigned_identity.user_assigned_identity.id
   subnet_id              = module.network.subnet1_id
   public_ip_address      = data.azurerm_public_ip.ip_address.id
-  depends_on        = [azurerm_role_assignment.base]
+  depends_on             = [azurerm_role_assignment.base]
 }
 
 resource "azurerm_role_assignment" "acr_agentpool" {
