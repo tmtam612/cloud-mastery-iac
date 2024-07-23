@@ -8,7 +8,7 @@ dns_label              = "topx"
 public_ip_address_name = "topx"
 dns_contributor_role   = "DNS Zone Contributor"
 #resource group
-resource_group_name         = ""
+resource_group_name         = "topx-rg-backend-nonprod-eastus"
 resource_group_abbrevation  = "rg"
 resource_group_profile      = "core"
 ip_address_resource_group   = "topx-rg-backend-nonprod-eastus"
